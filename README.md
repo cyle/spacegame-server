@@ -10,7 +10,7 @@ To use it properly, you should get the client as well.
 - Node.js Module: Socket.io (tested using version 0.9.16)
 - Node.js Module: Moniker (tested using version 0.1.2)
 - Node.js Module: Mongolian (tested using version 0.1.18)
-- Node.js Module: sigil-node (tested using version 0.0.1)
+- Node.js Module: sigil (tested using version 0.0.1)
 - MongoDB (tested using version 2.4.6)
 - SIGIL (tested using version 0.0.1)
 
@@ -20,7 +20,7 @@ Install Node.js, MongoDB, and SIGIL.
 
 Clone the repository for this server into a directory.
 
-In that directory, run `npm install socket.io moniker mongolian`
+In that directory, run `npm install socket.io moniker mongolian sigil`
 
 Make sure MongoDB and SIGIL are running.
 
