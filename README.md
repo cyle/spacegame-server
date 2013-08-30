@@ -7,8 +7,23 @@ To use it properly, you should get the client as well.
 ## Dependencies
 
 - Node.js (version 0.10 or higher)
-- Socket.io (tested using version 0.9.16)
-- Moniker (tested using version 0.1.2)
+- Node.js Module: Socket.io (tested using version 0.9.16)
+- Node.js Module: Moniker (tested using version 0.1.2)
+- Node.js Module: Mongolian (tested using version 0.1.18)
+- MongoDB (tested using version 2.4.6)
+- SIGIL (tested using version 0.0.1)
+
+## Installation
+
+Install Node.js, MongoDB, and SIGIL.
+
+Clone the repository for this server into a directory.
+
+In that directory, run `npm install socket.io moniker mongolian`
+
+Make sure MongoDB and SIGIL are running.
+
+That should be it!
 
 ## Usage
 
