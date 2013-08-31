@@ -12,7 +12,7 @@ To use it properly, you should get the client as well.
 - Node.js Module: Mongolian (tested using version 0.1.18)
 - Node.js Module: sigil (tested using version 0.0.1)
 - MongoDB (tested using version 2.4.6)
-- SIGIL (tested using version 0.0.1)
+- SIGIL (tested using version 0.0.2)
 
 ## Installation
 
