@@ -6,12 +6,15 @@
 
 console.log('SPACE GAME! server, revving up...');
 
-var app = require('http').createServer(handler);
-var io = require('socket.io').listen(app); // this is the magic
+// load the external requirements
 var Moniker = require('moniker'); // this will make up random names for new players
+var Mongolian = require('mongolian'); // mongodb client
+var sigil = require('sigil'); // my graph database client
 
+// get it going
+var app = require('http').createServer(handler); // make the new HTTP server
+var io = require('socket.io').listen(app); // this is the magic
 io.set('log level', 1); // only WARN-level log notices, please
-
 app.listen(31777); // load it up on this port
 
 // do not serve anything over http
