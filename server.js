@@ -82,13 +82,17 @@ io.sockets.on('connection', function(socket) {
 	});
 	
 	// if the player disconnects, tell everyone so they can stop rendering them
-	socket.on('disconnect', function () {
+	socket.on('disconnect', function() {
+		// update the database with their last known location
+		players_db.update( { 'name': player.name }, { '$set': { 'position.x': player.x, 'position.y': player.y, 'position.angle': player.angle } } );
 		console.log('player left: ' + player.name);
-		io.sockets.emit('removePlayer', player.name);
-		removePlayer(player);
+		io.sockets.emit('removePlayer', player.name); // tell everyone the player is gone
+		removePlayer(player); // stop tracking the player on the server side
 	});
 	
 	// when a player moves, let everyone know
+	var moveCounter = 0;
+	var maxMovesBeforeUpdate = 120; // this equates to once every two seconds or so
 	socket.on('move', function (data) {
 		//console.log(data);
 		player.updatePosition(data.x, data.y, data.angle); // update the player's position
@@ -99,9 +103,15 @@ io.sockets.on('connection', function(socket) {
 				players[i].updatePosition(data.x, data.y, data.angle);
 			}
 		}
-		// update the database
-		players_db.update( { 'name': player.name }, { '$set': { 'position.x': data.x, 'position.y': data.y, 'position.angle': data.angle } } );
-	});
+		moveCounter++;
+		if (moveCounter == maxMovesBeforeUpdate) {
+			//console.log('updating ' + player.name + ' location in database');
+			// update the database
+			players_db.update( { 'name': player.name }, { '$set': { 'position.x': data.x, 'position.y': data.y, 'position.angle': data.angle } } );
+			moveCounter = 0;
+		}
+	}); // end move update
+	
 });
 
 // function to remove a player from the server-side array of players
