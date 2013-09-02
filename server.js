@@ -9,12 +9,14 @@ console.log('SPACE GAME! server, revving up...');
 // load the external requirements
 var Moniker = require('moniker'); // this will make up random names for new players
 var Mongolian = require('mongolian'); // mongodb client
+var ObjectId =  require('mongolian').ObjectId; // mongodb objectID type
 var sigil = require('sigil'); // my graph database client
 
 // set up mongodb connection
 var mongoserver = new Mongolian('spacegame.com'); // spacegame.com is /etc/host to a local VM
 var mdb = mongoserver.db('spacegame'); // the mongodb database called "spacegame"
 var players_db = mdb.collection('players');
+var areas_db = mdb.collection('areas');
 
 // get it going
 var app = require('http').createServer(handler); // make the new HTTP server
@@ -53,7 +55,7 @@ io.sockets.on('connection', function(socket) {
 		
 		// if not, see if they are in the database
 		players_db.findOne({ 'name': name }, function(err, playerRecord) {
-			if (err) { console.log(err); }
+			if (err) { console.log(err); return; }
 			player = new Player(); // set up new player object
 			if (playerRecord != undefined) {
 				// player found in database -- use that info
@@ -62,11 +64,17 @@ io.sockets.on('connection', function(socket) {
 				player.x = playerRecord.position.x;
 				player.y = playerRecord.position.y;
 				player.angle = playerRecord.position.angle;
+				player.area = '' + playerRecord.position.area + '';
+				player.objID = '' + playerRecord['_id'] + '';
 			} else {
 				// player NOT found... create new
 				console.log('new player!');
 				player.name = name;
 				players_db.insert({ 'name': name, 'position': { 'x': 0, 'y': 0, 'z': 0, 'angle': 0 } });
+				
+				// need to get their object ID and set their initial area...
+				
+				
 			}
 			console.log(player); // current player
 			// add new player to array of players
@@ -79,6 +87,26 @@ io.sockets.on('connection', function(socket) {
 			socket.emit('otherPlayers', players); // give the new player the other players
 		}
 		
+	});
+	
+	// fetch the player's current area
+	socket.on('get-current-area', function() {
+		var player_objID = new ObjectId(player.objID);
+		areas_db.findOne({ 'players': player_objID }, function(err, areaRecord) {
+			if (err) { console.log(err); return; }
+			if (areaRecord == undefined) { console.log('could not find an area with the ID ' + area_id); return; }
+			socket.emit('current-area-data', areaRecord);
+		});
+	});
+	
+	// fetch and send full data about an area based on given ID
+	socket.on('get-area', function(area_id) {
+		var area_objID = new ObjectId(area_id);
+		areas_db.findOne({ '_id': area_objID }, function(err, areaRecord) {
+			if (err) { console.log(err); return; }
+			if (areaRecord == undefined) { console.log('could not find an area with the ID ' + area_id); return; }
+			socket.emit('area-data', areaRecord);
+		});
 	});
 	
 	// if the player disconnects, tell everyone so they can stop rendering them
@@ -130,11 +158,13 @@ function removePlayer(player) {
 */
 
 function Player() {
+	this.objID = ''; // their unique mongodb ID
 	this.name = Moniker.choose();
 	this.x = 0.0;
 	this.y = 0.0;
 	this.z = 0.0;
 	this.angle = 0.0;
+	this.area = ''; // dunno where they are yet
 }
 
 Player.prototype.updatePosition = function(x, y, angle) {
