@@ -11,6 +11,11 @@ var Moniker = require('moniker'); // this will make up random names for new play
 var Mongolian = require('mongolian'); // mongodb client
 var sigil = require('sigil'); // my graph database client
 
+// set up mongodb connection
+var mongoserver = new Mongolian('spacegame.com'); // spacegame.com is /etc/host to a local VM
+var mdb = mongoserver.db('spacegame'); // the mongodb database called "spacegame"
+var players_db = mdb.collection('players');
+
 // get it going
 var app = require('http').createServer(handler); // make the new HTTP server
 var io = require('socket.io').listen(app); // this is the magic
@@ -30,17 +35,51 @@ io.sockets.on('connection', function(socket) {
 	
 	// on new connection, make a new player object for them
 	var player = new Player();
+	
 	// log the new player
-	console.log('new player:');
-	console.log(player);
-	// give the new player their name
-	socket.emit('welcome', player.name);
-	if (players.length > 0) { // if there's more than one other player...
-		socket.emit('otherPlayers', players); // give the new player the other players
-	}
-	players.push(player); // add new player to array of players
-	// send to all players this new player's attributes
-	io.sockets.emit('newPlayer', player);
+	console.log('player connected');
+	
+	socket.on('connected', function(name) {
+		
+		// check to see if the name exists already
+		for (var i = 0; i < players; i++) {
+			if (players[i].name == name) { // if so, send along their info
+				player = players[i];
+				socket.emit('welcome', player);
+				io.sockets.emit('newPlayer', player);
+				return;
+			}
+		}
+		
+		// if not, see if they are in the database
+		players_db.findOne({ 'name': name }, function(err, playerRecord) {
+			if (err) { console.log(err); }
+			player = new Player(); // set up new player object
+			if (playerRecord != undefined) {
+				// player found in database -- use that info
+				console.log('returning player!');
+				player.name = playerRecord.name;
+				player.x = playerRecord.position.x;
+				player.y = playerRecord.position.y;
+				player.angle = playerRecord.position.angle;
+			} else {
+				// player NOT found... create new
+				console.log('new player!');
+				player.name = name;
+				players_db.insert({ 'name': name, 'position': { 'x': 0, 'y': 0, 'z': 0, 'angle': 0 } });
+			}
+			console.log(player); // current player
+			// add new player to array of players
+			players.push(player);
+			socket.emit('welcome', player);
+			io.sockets.emit('newPlayer', player); // send to all players this new player's attributes
+		});
+		
+		if (players.length > 0) { // if there's more than one other player...
+			socket.emit('otherPlayers', players); // give the new player the other players
+		}
+		
+	});
 	
 	// if the player disconnects, tell everyone so they can stop rendering them
 	socket.on('disconnect', function () {
@@ -60,6 +99,8 @@ io.sockets.on('connection', function(socket) {
 				players[i].updatePosition(data.x, data.y, data.angle);
 			}
 		}
+		// update the database
+		players_db.update( { 'name': player.name }, { '$set': { 'position.x': data.x, 'position.y': data.y, 'position.angle': data.angle } } );
 	});
 });
 
@@ -82,6 +123,7 @@ function Player() {
 	this.name = Moniker.choose();
 	this.x = 0.0;
 	this.y = 0.0;
+	this.z = 0.0;
 	this.angle = 0.0;
 }
 
