@@ -7,7 +7,6 @@
 console.log('SPACE GAME! server, revving up...');
 
 // load the external requirements
-var Moniker = require('moniker'); // this will make up random names for new players
 var Mongolian = require('mongolian'); // mongodb client
 var ObjectId =  require('mongolian').ObjectId; // mongodb objectID type
 var sigil = require('sigil'); // my graph database client
@@ -160,7 +159,7 @@ function removePlayer(player) {
 
 function Player() {
 	this.objID = ''; // their unique mongodb ID
-	this.name = Moniker.choose();
+	this.name = ''; // this will be filled in by the player
 	this.x = 0.0;
 	this.y = 0.0;
 	this.z = 0.0;
