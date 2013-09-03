@@ -124,12 +124,12 @@ io.sockets.on('connection', function(socket) {
 	var maxMovesBeforeUpdate = 120; // this equates to once every two seconds or so
 	socket.on('move', function (data) {
 		//console.log(data);
-		player.updatePosition(data.x, data.y, data.angle); // update the player's position
+		player.updatePosition(data.x, data.y, data.angle, data.direction); // update the player's position
 		io.sockets.emit('updatePlayer', player); // send this updated player data out to clients
 		// update the server-side array of players
 		for (i = 0; i < players.length; i++) {
 			if (players[i].name == player.name) {
-				players[i].updatePosition(data.x, data.y, data.angle);
+				players[i].updatePosition(data.x, data.y, data.angle, data.direction);
 			}
 		}
 		moveCounter++;
@@ -165,11 +165,13 @@ function Player() {
 	this.y = 0.0;
 	this.z = 0.0;
 	this.angle = 0.0;
+	this.thrustDirection = 0;
 	this.area = ''; // dunno where they are yet
 }
 
-Player.prototype.updatePosition = function(x, y, angle) {
+Player.prototype.updatePosition = function(x, y, angle, direction) {
 	this.x = x;
 	this.y = y;
 	this.angle = angle;
+	this.thrustDirection = direction;
 }
