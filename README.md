@@ -29,6 +29,10 @@ That should be it!
 
 Pretty simple: `node server.js` for now. Players connecting with their clients must enter the IP or hostname of this server.
 
+If you are just starting, I also suggest running `node utils/build-new-area.js` to build the starting area.
+
+Right now the mongodb ID of this "starting area" is defined on line 72 of `server.js`, so you'll probably need to update that with your starting area.
+
 ## Server Functionality
 
 - keeps track of all players currently connected
