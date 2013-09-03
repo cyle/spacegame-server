@@ -20,6 +20,9 @@ var areas_db = mdb.collection('areas');
 // get it going
 var app = require('http').createServer(handler); // make the new HTTP server
 var io = require('socket.io').listen(app); // this is the magic
+io.enable('browser client minification'); // send minified client
+io.enable('browser client etag'); // apply etag caching logic based on version number
+io.enable('browser client gzip'); // gzip the file
 io.set('log level', 1); // only WARN-level log notices, please
 app.listen(31777); // load it up on this port
 
