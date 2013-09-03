@@ -127,7 +127,7 @@ io.sockets.on('connection', function(socket) {
 	socket.on('move', function (data) {
 		//console.log(data);
 		player.updatePosition(data.x, data.y, data.angle, data.direction); // update the player's position
-		io.sockets.emit('updatePlayer', player); // send this updated player data out to clients
+		io.sockets.volatile.emit('updatePlayer', player); // send this updated player data out to clients
 		// update the server-side array of players
 		for (i = 0; i < players.length; i++) {
 			if (players[i].name == player.name) {
