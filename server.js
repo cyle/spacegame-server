@@ -70,11 +70,12 @@ io.sockets.on('connection', function(socket) {
 				// player NOT found... create new
 				console.log('new player!');
 				player.name = name;
-				players_db.insert({ 'name': name, 'position': { 'x': 0, 'y': 0, 'z': 0, 'angle': 0 } });
-				
-				// need to get their object ID and set their initial area...
-				
-				
+				player.area = '5225235a000000d063000002'; // starting area mongodb ID
+				var newplayer_doc = { 'name': name, 'position': { 'x': 0, 'y': 0, 'z': 0, 'angle': 0, 'area': new ObjectId(player.area) } };
+				players_db.insert(newplayer_doc);
+				player.objID = '' + newplayer_doc['_id'] + ''; // their new mongodb ID
+				console.log('new player ID: ' + player.objID);
+				areas_db.update( {'name': 'starting area'}, {'$push': { 'players': newplayer_doc['_id'] } } );
 			}
 			console.log(player); // current player
 			// add new player to array of players
@@ -94,7 +95,7 @@ io.sockets.on('connection', function(socket) {
 		var player_objID = new ObjectId(player.objID);
 		areas_db.findOne({ 'players': player_objID }, function(err, areaRecord) {
 			if (err) { console.log(err); return; }
-			if (areaRecord == undefined) { console.log('could not find an area with the ID ' + area_id); return; }
+			if (areaRecord == undefined) { console.log('could not find where the current player is'); return; }
 			socket.emit('current-area-data', areaRecord);
 		});
 	});

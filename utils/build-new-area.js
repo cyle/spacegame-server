@@ -36,7 +36,7 @@ var mdb = mongoserver.db('spacegame'); // the mongodb database called "spacegame
 var areas = mdb.collection('areas');
 
 // clear areas collection to start fresh
-areas.remove();
+//areas.remove();
 
 /*
 
@@ -45,11 +45,10 @@ areas.remove();
 */
 
 var new_area = {}; // this will hold the new area, for saving later
-new_area.name = 'test area'; // the name of the area
+new_area.name = 'starting area'; // the name of the area
 new_area.owner = false; // what civ owns this area? false for none, _id for one
-new_area.stuff = []; // this will hold the stuff floating around the area
 new_area.players = []; // the players currently inhabiting this area
-new_area.players.push( new ObjectId('5223bd226e5ac7da41ceac1f') ); // cyle
+new_area.stuff = []; // this will hold the stuff floating around the area
 
 // set up area limits
 new_area.width = 200; // randomize eventually
