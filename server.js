@@ -25,6 +25,7 @@ io.enable('browser client etag'); // apply etag caching logic based on version n
 io.enable('browser client gzip'); // gzip the file
 io.set('log level', 1); // only WARN-level log notices, please
 app.listen(31777); // load it up on this port
+console.log('listening on port 31777...');
 
 // do not serve anything over http
 function handler(req, res) {
@@ -50,7 +51,7 @@ io.sockets.on('connection', function(socket) {
 			if (players[i].name == name) { // if so, send along their info
 				player = players[i];
 				socket.emit('welcome', player);
-				io.sockets.emit('newPlayer', player);
+				socket.broadcast.emit('newPlayer', player);
 				return;
 			}
 		}
@@ -73,7 +74,7 @@ io.sockets.on('connection', function(socket) {
 				console.log('new player!');
 				player.name = name;
 				player.area = '5225235a000000d063000002'; // starting area mongodb ID
-				var newplayer_doc = { 'name': name, 'position': { 'x': 0, 'y': 0, 'z': 0, 'angle': 0, 'area': new ObjectId(player.area) } };
+				var newplayer_doc = { 'name': name, 'position': { 'x': 2, 'y': 2, 'z': 0, 'angle': 0, 'area': new ObjectId(player.area) } };
 				players_db.insert(newplayer_doc);
 				player.objID = '' + newplayer_doc['_id'] + ''; // their new mongodb ID
 				console.log('new player ID: ' + player.objID);
@@ -83,7 +84,7 @@ io.sockets.on('connection', function(socket) {
 			// add new player to array of players
 			players.push(player);
 			socket.emit('welcome', player);
-			io.sockets.emit('newPlayer', player); // send to all players this new player's attributes
+			socket.broadcast.emit('newPlayer', player); // send to all players this new player's attributes
 		});
 		
 		if (players.length > 0) { // if there's more than one other player...
@@ -117,7 +118,7 @@ io.sockets.on('connection', function(socket) {
 		// update the database with their last known location
 		players_db.update( { 'name': player.name }, { '$set': { 'position.x': player.x, 'position.y': player.y, 'position.angle': player.angle } } );
 		console.log('player left: ' + player.name);
-		io.sockets.emit('removePlayer', player.name); // tell everyone the player is gone
+		socket.broadcast.emit('removePlayer', player.name); // tell everyone the player is gone
 		removePlayer(player); // stop tracking the player on the server side
 	});
 	
@@ -125,9 +126,12 @@ io.sockets.on('connection', function(socket) {
 	var moveCounter = 0;
 	var maxMovesBeforeUpdate = 120; // this equates to once every two seconds or so
 	socket.on('move', function (data) {
+		if (data.x == null || data.y == null || data.angle == null || data.direction == null) {
+			return;
+		}
 		//console.log(data);
 		player.updatePosition(data.x, data.y, data.angle, data.direction); // update the player's position
-		io.sockets.volatile.emit('updatePlayer', player); // send this updated player data out to clients
+		socket.broadcast.volatile.emit('updatePlayer', player); // send this updated player data out to other clients
 		// update the server-side array of players
 		for (i = 0; i < players.length; i++) {
 			if (players[i].name == player.name) {
@@ -137,6 +141,7 @@ io.sockets.on('connection', function(socket) {
 		moveCounter++;
 		if (moveCounter == maxMovesBeforeUpdate) {
 			//console.log('updating ' + player.name + ' location in database');
+			//console.log(data);
 			// update the database
 			players_db.update( { 'name': player.name }, { '$set': { 'position.x': data.x, 'position.y': data.y, 'position.angle': data.angle } } );
 			moveCounter = 0;
