@@ -131,7 +131,15 @@ io.sockets.on('connection', function(socket) {
 		}
 		//console.log(data);
 		player.updatePosition(data.x, data.y, data.angle, data.direction); // update the player's position
-		socket.broadcast.volatile.emit('updatePlayer', player); // send this updated player data out to other clients
+		
+		if (data.state == 'invisible') {
+			//console.log('player ' + player.name + ' has gone invisible!');
+			socket.broadcast.emit('removePlayer', player.name); // player is invisible -- remove them!
+		} else {
+			//console.log('player ' + player.name + ' moved!');
+			socket.broadcast.volatile.emit('updatePlayer', player); // send this updated player data out to other clients
+		}
+		
 		// update the server-side array of players
 		for (i = 0; i < players.length; i++) {
 			if (players[i].name == player.name) {
