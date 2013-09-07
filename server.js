@@ -51,7 +51,7 @@ io.sockets.on('connection', function(socket) {
 			if (players[i].name == name) { // if so, send along their info
 				player = players[i];
 				socket.emit('welcome', player);
-				socket.broadcast.emit('newPlayer', player);
+				socket.broadcast.volatile.emit('updatePlayer', player);
 				return;
 			}
 		}
@@ -84,7 +84,7 @@ io.sockets.on('connection', function(socket) {
 			// add new player to array of players
 			players.push(player);
 			socket.emit('welcome', player);
-			socket.broadcast.emit('newPlayer', player); // send to all players this new player's attributes
+			socket.broadcast.volatile.emit('updatePlayer', player); // send to all players this new player's attributes
 		});
 		
 		if (players.length > 0) { // if there's more than one other player...
