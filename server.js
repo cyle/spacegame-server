@@ -33,8 +33,27 @@ function handler(req, res) {
     res.end('Nope.');
 }
 
+/*
+
+	current state data
+
+*/
+
 // this will hold onto all current players
 var players = [];
+
+// this will hold onto all current bullets
+var bullets = [];
+
+// this will hold into all current salvageable objects
+var salvages = [];
+
+
+/*
+
+	deal with player connections
+
+*/
 
 io.sockets.on('connection', function(socket) {
 	
@@ -44,7 +63,7 @@ io.sockets.on('connection', function(socket) {
 	// log the new player
 	console.log('player connected');
 	
-	socket.on('connected', function(name) {
+	socket.on('connected', function(name) { // the client tells us they're connected and who they are
 		
 		// check to see if the name exists already
 		for (var i = 0; i < players; i++) {
@@ -158,14 +177,39 @@ io.sockets.on('connection', function(socket) {
 	
 });
 
+
+/*
+
+	helper functions
+
+*/
+
 // function to remove a player from the server-side array of players
 function removePlayer(player) {
-	for (i = 0; i < players.length; i++) {
+	for (var i = 0; i < players.length; i++) {
 		if (players[i].name == player.name) {
 			players.splice(i, 1);
 		}
 	}
 }
+
+/*
+
+	the server-side engine
+
+*/
+
+setInterval(function() {
+	
+	// update bullets
+	
+	// check bullets for collisions
+	
+	// send along updates to players about bullets
+	
+	// if bullet is expired or exploded, get rid of it
+	
+}, 100); // 100 = 10fps, 20 = 50fps
 
 /*
 
@@ -190,3 +234,34 @@ Player.prototype.updatePosition = function(x, y, angle, direction) {
 	this.angle = angle;
 	this.thrustDirection = direction;
 }
+
+/*
+
+	the Bullet class
+
+*/
+
+function Bullet(area, x, y, angle, type, playerOwner) {
+	this.area = area;
+	this.x = x;
+	this.y = y;
+	this.angle = angle;
+	this.type = type;
+	this.playerOwner = playerOwner;
+	
+	// look up type of weapon for info on it? speed, damage, etc?
+	
+	// make sure player actually has this weapon?
+	
+}
+
+Bullet.prototype.checkCollisions = function() {
+	// check to see if this bullet has hit anything that's hit-able
+	
+}
+
+/*
+
+	the Salvageable class
+
+*/
