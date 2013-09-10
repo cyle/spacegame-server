@@ -35,6 +35,28 @@ function handler(req, res) {
 
 /*
 
+	helper functions
+
+*/
+
+// rect center X, rect center Y, rect width, rect height, rect rotation (radians), point X, point Y
+function pointInsideRotatedRect(rx, ry, rw, rh, rot, px, py) {
+	var dx = px - rx;
+	var dy = py - ry;
+	var h1 = Math.sqrt( (dx * dx) + (dy * dy) );
+	var currA = Math.atan2(dy, dx);
+	var newA = currA - rot;
+	var x2 = Math.cos(newA) * h1;
+	var y2 = Math.sin(newA) * h1;
+	if (x2 > -0.5 * rw && x2 < 0.5 * rw && y2 > -0.5 * rh && y2 < 0.5 * rh) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+/*
+
 	current state data
 
 */
@@ -233,6 +255,13 @@ setInterval(function() {
 		}
 	}
 	
+	// see if anybody's dead!
+	for (var i = 0; i < players.length; i++) {
+		if (players[i].hpCurrent <= 0) {
+			//console.log( players[i].name + ' is dead!');
+		}
+	}
+	
 	lastTime = new Date();
 	
 }, 15); // 100 = 10fps, 20 = 50fps, 15 = 66.667fps
@@ -252,6 +281,7 @@ function Player() {
 	this.angle = 0.0;
 	this.thrustDirection = 0;
 	this.area = ''; // dunno where they are yet
+	this.hpCurrent = 50;
 }
 
 Player.prototype.updatePosition = function(x, y, angle, direction) {
@@ -259,6 +289,10 @@ Player.prototype.updatePosition = function(x, y, angle, direction) {
 	this.y = y;
 	this.angle = angle;
 	this.thrustDirection = direction;
+}
+
+Player.prototype.damage = function(amount) {
+	this.hpCurrent -= amount;
 }
 
 /*
@@ -314,9 +348,25 @@ Bullet.prototype.checkCollisions = function() {
 	// all of the other destroyable objects
 	// and say whether it has hit or not
 	
+	var playerSize = 2;
+	
+	// go through all of the players' ships
+	for (var i = 0; i < players.length; i++) {
+		if (players[i].name != this.playerOwner) {
+			if (pointInsideRotatedRect(players[i].x, players[i].y, playerSize, playerSize, players[i].angle, this.x, this.y)) {
+				console.log('player ' + this.playerOwner + ' hit player ' + players[i].name);
+				this.didHit = { x: this.x, y: this.y, playerName: players[i].name, damage: 5 };
+				// update player's HP that was hit?
+				players[i].damage(5);
+				return;
+			}
+		}
+	}
+	
+	// go through all of the environment destructable objects
+	
 	
 }
-
 
 /*
 
