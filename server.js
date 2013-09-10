@@ -175,6 +175,12 @@ io.sockets.on('connection', function(socket) {
 		}
 	}); // end move update
 	
+	// when a player fires, keep track of the bullet
+	socket.on('fired', function (data) {
+		console.log('player ' + player.name + ' fired weapon type ' + data.weaponType + ' in area ' + player.area);
+		bullets.push( new Bullet(player.area, player.x, player.y, player.angle, data.weaponType, player.name) );
+	});
+	
 });
 
 
@@ -199,17 +205,37 @@ function removePlayer(player) {
 
 */
 
+var lastTime = new Date();
+
 setInterval(function() {
 	
+	var nowTime = new Date();
+	var deltaTime = (nowTime - lastTime)/1000; // deltaTime = percentage of one second elapsed between "frames"
+	//console.log('delta time: ' + deltaTime);
+	
 	// update bullets
-	
 	// check bullets for collisions
-	
 	// send along updates to players about bullets
-	
 	// if bullet is expired or exploded, get rid of it
 	
-}, 100); // 100 = 10fps, 20 = 50fps
+	// go through the bullets, update them
+	for (var i = 0; i < bullets.length; i++) {
+		bullets[i].update(deltaTime); // update!
+		bullets[i].checkCollisions(); // check to see if the bullet hit anything
+		if (bullets[i].didHit != false) {
+			io.sockets.emit('removeBullet', { id: bullets[i].id, didHit: bullets[i].didHit });
+			bullets.splice(i, 1); // remove from the array of bullets
+		} else if (bullets[i].done == true) {
+			io.sockets.emit('removeBullet', { id: bullets[i].id, didHit: false });
+			bullets.splice(i, 1); // remove from the array of bullets
+		} else {
+			io.sockets.emit('updateBullet', { id: bullets[i].id, x: bullets[i].x, y: bullets[i].y, angle: bullets[i].angle });
+		}
+	}
+	
+	lastTime = new Date();
+	
+}, 15); // 100 = 10fps, 20 = 50fps, 15 = 66.667fps
 
 /*
 
@@ -242,23 +268,55 @@ Player.prototype.updatePosition = function(x, y, angle, direction) {
 */
 
 function Bullet(area, x, y, angle, type, playerOwner) {
+	// position info
 	this.area = area;
 	this.x = x;
 	this.y = y;
-	this.angle = angle;
+	this.z = 0.0;
+	this.angle = angle; // the angle it's travelling at
+	
+	// meta info
+	this.id = Math.random() * 100000;
 	this.type = type;
 	this.playerOwner = playerOwner;
 	
 	// look up type of weapon for info on it? speed, damage, etc?
-	
 	// make sure player actually has this weapon?
+	
+	// distance info
+	this.distanceTravelled = 0.0; // how far has it gone so far
+	this.distanceLimit = 30; // when should it stop travelling
+	this.distancePerTick = 0.0; // how many units does it travel per update
+	this.currentSpeed = 35; // the speed of it (constant)
+	
+	// state info
+	this.done = false;
+	this.didHit = false;
+}
+
+Bullet.prototype.update = function(dTime) {
+	// travel:
+	var lastX = this.x;
+	var lastY = this.y;
+	this.x += (Math.sin(this.angle) * -this.currentSpeed) * dTime;
+	this.y += (Math.cos(this.angle) * this.currentSpeed) * dTime;
+	if (this.distancePerTick == 0.0) { // figure out how far it travels per update
+		this.distancePerTick = Math.sqrt( Math.pow(this.x - lastX, 2) + Math.pow(this.y - lastY, 2) );
+	}
+	this.distanceTravelled += this.distancePerTick; // add how far it's gone so far
+	if (this.distanceTravelled >= this.distanceLimit) { // gone far enough?
+		this.done = true; // done, kid
+	}
+}
+
+Bullet.prototype.checkCollisions = function() {	
+	// this should go into all of the other players' ships,
+	// all of the other destroyable objects
+	// and say whether it has hit or not
+	
 	
 }
 
-Bullet.prototype.checkCollisions = function() {
-	// check to see if this bullet has hit anything that's hit-able
-	
-}
 
 /*
 
