@@ -55,6 +55,15 @@ function pointInsideRotatedRect(rx, ry, rw, rh, rot, px, py) {
 	}
 }
 
+function pointInsideCircle(cx, cy, r, px, py) {
+	var square_dist = Math.pow((cx - px), 2) + Math.pow((cy - py), 2);
+	if (square_dist <= Math.pow(r, 2)) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
 /*
 
 	current state data
