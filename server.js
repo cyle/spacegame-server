@@ -100,8 +100,9 @@ io.sockets.on('connection', function(socket) {
 		for (var i = 0; i < players; i++) {
 			if (players[i].name == name) { // if so, send along their info
 				player = players[i];
+				socket.join(player.area); // join the zone they're in
 				socket.emit('welcome', player);
-				socket.broadcast.volatile.emit('updatePlayer', player);
+				socket.broadcast.volatile.to(player.area).emit('updatePlayer', player);
 				return;
 			}
 		}
@@ -133,8 +134,9 @@ io.sockets.on('connection', function(socket) {
 			console.log(player); // current player
 			// add new player to array of players
 			players.push(player);
+			socket.join(player.area); // join the zone they're in
 			socket.emit('welcome', player);
-			socket.broadcast.volatile.emit('updatePlayer', player); // send to all players this new player's attributes
+			socket.broadcast.volatile.to(player.area).emit('updatePlayer', player); // send to all players this new player's attributes
 		});
 		
 		if (players.length > 0) { // if there's more than one other player...
@@ -168,7 +170,7 @@ io.sockets.on('connection', function(socket) {
 		// update the database with their last known location
 		players_db.update( { 'name': player.name }, { '$set': { 'position.x': player.x, 'position.y': player.y, 'position.angle': player.angle } } );
 		console.log('player left: ' + player.name);
-		socket.broadcast.emit('removePlayer', player.name); // tell everyone the player is gone
+		socket.broadcast.to(player.area).emit('removePlayer', player.name); // tell everyone the player is gone
 		removePlayer(player); // stop tracking the player on the server side
 	});
 	
@@ -184,10 +186,10 @@ io.sockets.on('connection', function(socket) {
 		
 		if (data.state == 'invisible') {
 			//console.log('player ' + player.name + ' has gone invisible!');
-			socket.broadcast.emit('removePlayer', player.name); // player is invisible -- remove them!
+			socket.broadcast.to(player.area).emit('removePlayer', player.name); // player is invisible -- remove them!
 		} else {
 			//console.log('player ' + player.name + ' moved!');
-			socket.broadcast.volatile.emit('updatePlayer', player); // send this updated player data out to other clients
+			socket.broadcast.to(player.area).volatile.emit('updatePlayer', player); // send this updated player data out to other clients
 		}
 		
 		// update the server-side array of players
@@ -254,13 +256,13 @@ setInterval(function() {
 		bullets[i].update(deltaTime); // update!
 		bullets[i].checkCollisions(); // check to see if the bullet hit anything
 		if (bullets[i].didHit != false) {
-			io.sockets.emit('removeBullet', { id: bullets[i].id, didHit: bullets[i].didHit });
+			io.sockets.in(bullets[i].area).emit('removeBullet', { id: bullets[i].id, didHit: bullets[i].didHit });
 			bullets.splice(i, 1); // remove from the array of bullets
 		} else if (bullets[i].done == true) {
-			io.sockets.emit('removeBullet', { id: bullets[i].id, didHit: false });
+			io.sockets.in(bullets[i].area).emit('removeBullet', { id: bullets[i].id, didHit: false });
 			bullets.splice(i, 1); // remove from the array of bullets
 		} else {
-			io.sockets.emit('updateBullet', { id: bullets[i].id, x: bullets[i].x, y: bullets[i].y, angle: bullets[i].angle });
+			io.sockets.in(bullets[i].area).emit('updateBullet', { id: bullets[i].id, x: bullets[i].x, y: bullets[i].y, angle: bullets[i].angle });
 		}
 	}
 	
