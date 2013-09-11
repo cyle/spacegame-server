@@ -64,11 +64,39 @@ function pointInsideCircle(cx, cy, r, px, py) {
 	}
 }
 
+function randomInt(min, max) { // inclusive
+	if (max == undefined) { // assume it's between 0 and whatever
+		return Math.floor(Math.random() * (min + 1));
+	} else {
+		return Math.floor(Math.random() * (max - min + 1)) + min;
+	}
+}
+
+function randomFloat(min, max) {
+	if (max == undefined) { // assume it's between 0 and whatever
+		return Math.random() * min;
+	} else {
+		return Math.random() * (max - min) + min;
+	}
+}
+
+function valueInArray(needle, haystack) {
+	for (var i = 0; i < haystack.length; i++) {
+		if (haystack[i] == needle) {
+			return true;
+		}
+	}
+	return false;
+}
+
 /*
 
 	current state data
 
 */
+
+// this will hold onto all area IDs that contain players
+var active_areas = [];
 
 // this will hold onto all current players
 var players = [];
@@ -101,6 +129,7 @@ io.sockets.on('connection', function(socket) {
 			if (players[i].name == name) { // if so, send along their info
 				player = players[i];
 				socket.join(player.area); // join the zone they're in
+				if (valueInArray(player.area, active_areas) == false) { active_areas.push(player.area); } // add area to tracked areas
 				socket.emit('welcome', player);
 				socket.broadcast.volatile.to(player.area).emit('updatePlayer', player);
 				return;
@@ -135,6 +164,7 @@ io.sockets.on('connection', function(socket) {
 			// add new player to array of players
 			players.push(player);
 			socket.join(player.area); // join the zone they're in
+			if (valueInArray(player.area, active_areas) == false) { active_areas.push(player.area); } // add area to tracked areas
 			socket.emit('welcome', player);
 			socket.broadcast.volatile.to(player.area).emit('updatePlayer', player); // send to all players this new player's attributes
 		});
@@ -234,22 +264,62 @@ function removePlayer(player) {
 
 /*
 
-	the server-side engine
-
+	the server-side general stuff engine
+	
 */
 
-var lastTime = new Date();
+var lastGeneralTime = new Date();
 
 setInterval(function() {
 	
 	var nowTime = new Date();
-	var deltaTime = (nowTime - lastTime)/1000; // deltaTime = percentage of one second elapsed between "frames"
-	//console.log('delta time: ' + deltaTime);
+	var deltaTime = (nowTime - lastGeneralTime)/1000; // deltaTime = percentage of one second elapsed between "frames"
 	
-	// update bullets
-	// check bullets for collisions
-	// send along updates to players about bullets
-	// if bullet is expired or exploded, get rid of it
+	// rebuild active areas
+	active_areas = [];
+	for (var i = 0; i < players.length; i++) {
+		active_areas.push(players.area);
+	}
+	
+	// salvage-ables
+	if (salvages.length < 10) { // if it's less than 10, maybe make a new one?
+		if (randomInt(0, 1000) > 500) { // chance high for development
+			var salvage = new Salvage( active_areas[0] );
+			salvages.push(salvage);
+			io.sockets.in(salvage.area).emit('newSalvage', { id: salvage.id, x: salvage.x, y: salvage.y });
+		}
+	}
+	
+	// update salvage-ables
+	for (var i = 0; i < salvages.length; i++) {
+		salvages[i].update(deltaTime);
+	}
+	
+	// any salvage-ables done? send out an update
+	for (var i = 0; i < salvages.length; i++) {
+		if (salvages[i].done == true) {
+			io.sockets.in(salvages[i].area).emit('removeSalvage', { id: salvages[i].id });
+			salvages.splice(i, 1); // remove from the array of salvages
+		}
+	}
+	
+	lastGeneralTime = new Date();
+	
+}, 100); // 100 = 10fps
+
+/*
+
+	the server-side physics engine
+
+*/
+
+var lastPhysicsTime = new Date();
+
+setInterval(function() {
+	
+	var nowTime = new Date();
+	var deltaTime = (nowTime - lastPhysicsTime)/1000; // deltaTime = percentage of one second elapsed between "frames"
+	//console.log('delta time: ' + deltaTime);
 	
 	// go through the bullets, update them
 	for (var i = 0; i < bullets.length; i++) {
@@ -273,7 +343,7 @@ setInterval(function() {
 		}
 	}
 	
-	lastTime = new Date();
+	lastPhysicsTime = new Date();
 	
 }, 15); // 100 = 10fps, 20 = 50fps, 15 = 66.667fps
 
@@ -381,6 +451,28 @@ Bullet.prototype.checkCollisions = function() {
 
 /*
 
-	the Salvageable class
+	the Salvage-able class
 
 */
+
+function Salvage(area) {
+	// position info
+	this.area = area;
+	this.x = randomFloat(0, 100);
+	this.y = randomFloat(0, 100);
+	this.z = 0.0;
+	
+	// meta info
+	this.id = Math.random() * 100000;
+	this.timeSoFar = 0.0; // how much time has this piece of salvage been active
+	this.timeLimit = 30; // disappears after this many seconds
+	this.done = false;
+}
+
+Salvage.prototype.update = function(dTime) {
+	// add how much time has passed
+	this.timeSoFar += dTime;
+	if (this.timeSoFar > this.timeLimit) {
+		this.done = true;
+	}
+}
