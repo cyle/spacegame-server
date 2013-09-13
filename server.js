@@ -39,6 +39,18 @@ function handler(req, res) {
 
 */
 
+function signTriangle(p1, p2, p3) {
+	return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
+}
+
+// triangle vertex 1, vertex 2, vertex 3, point to check
+function pointInsideTriangle(v1, v2, v3, pt) {
+	var b1 = signTriangle(pt, v1, v2) < 0;
+	var b2 = signTriangle(pt, v2, v3) < 0;
+	var b3 = signTriangle(pt, v3, v1) < 0;
+	return ((b1 == b2) && (b2 == b3));
+}
+
 // rect center X, rect center Y, rect width, rect height, rect rotation (radians), point X, point Y
 function pointInsideRotatedRect(rx, ry, rw, rh, rot, px, py) {
 	var dx = px - rx;
@@ -87,6 +99,14 @@ function valueInArray(needle, haystack) {
 		}
 	}
 	return false;
+}
+
+function degreesToRadians(degrees) {
+	return degrees * (Math.PI/180);
+}
+
+function radiansToDegrees(radians) {
+	return radians * (180/Math.PI);
 }
 
 /*
@@ -260,6 +280,32 @@ io.sockets.on('connection', function(socket) {
 	socket.on('fired', function (data) {
 		console.log('player ' + player.name + ' fired weapon type ' + data.weaponType + ' in area ' + player.area);
 		bullets.push( new Bullet(player.area, player.x, player.y, player.angle, data.weaponType, player.name) );
+	});
+	
+	socket.on('salvage', function() {
+		console.log('player '+player.name+' trying to salvage object in area ' + player.area);
+		//console.log('players x: '+player.x+', y: '+player.y+', angle: ' + player.angle)
+		// create the triangle of salvage-able area in front of the player
+		var salvageAngle = 60; // this is the angle of the salvage emitter
+		var salvageDistance = 5; // this is the max distance ahead
+		//var salvageTriangleSide = Math.cos( degreesToRadians(salvageAngle)/2 ) * salvageDistance;
+		var point1 = { x: player.x, y: player.y }; // the player center
+		var point2 = {};
+		point2.x = point1.x + (Math.sin(player.angle + degreesToRadians(salvageAngle)/2) * -salvageDistance);
+		point2.y = point1.y + (Math.cos(player.angle + degreesToRadians(salvageAngle)/2) * salvageDistance);
+		var point3 = {};
+		point3.x = point1.x + (Math.sin(player.angle - degreesToRadians(salvageAngle)/2) * -salvageDistance);
+		point3.y = point1.y + (Math.cos(player.angle - degreesToRadians(salvageAngle)/2) * salvageDistance);
+		// point inside triangle algorithm: http://stackoverflow.com/questions/2049582/how-to-determine-a-point-in-a-triangle
+		//socket.emit('salvage-response', { a: point1, b: point2, c: point3 });
+		for (var i = 0; i < salvages.length; i++) {
+			if (salvages[i].area == player.area && pointInsideTriangle(point1, point2, point3, { x: salvages[i].x, y: salvages[i].y })) {
+				console.log('player '+player.name+' salvaged id #' + salvages[i].id);
+				socket.emit('salvaged', { id: salvages[i].id });
+				io.sockets.in(salvages[i].area).emit('removeSalvage', { id: salvages[i].id });
+				salvages.splice(i, 1); // remove from the array of salvages
+			}
+		}
 	});
 	
 });
