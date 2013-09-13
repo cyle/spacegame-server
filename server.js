@@ -107,6 +107,13 @@ var bullets = [];
 // this will hold into all current salvageable objects
 var salvages = [];
 
+// get whatever the ID for the starting area is
+var starting_area_id = undefined;
+areas_db.findOne({ 'name': 'starting area' }, function(err, area_record) {
+	starting_area_id = area_record['_id'];
+	console.log('starting area _id is: ' + starting_area_id);
+});
+
 
 /*
 
@@ -153,8 +160,8 @@ io.sockets.on('connection', function(socket) {
 				// player NOT found... create new
 				console.log('new player!');
 				player.name = name;
-				player.area = '5225235a000000d063000002'; // starting area mongodb ID
-				var newplayer_doc = { 'name': name, 'position': { 'x': 2, 'y': 2, 'z': 0, 'angle': 0, 'area': new ObjectId(player.area) } };
+				player.area = starting_area_id; // starting area mongodb ID
+				var newplayer_doc = { 'name': name, 'position': { 'x': 2, 'y': 2, 'z': 0, 'angle': 0, 'area': player.area } };
 				players_db.insert(newplayer_doc);
 				player.objID = '' + newplayer_doc['_id'] + ''; // their new mongodb ID
 				console.log('new player ID: ' + player.objID);
