@@ -131,6 +131,8 @@ io.sockets.on('connection', function(socket) {
 	
 	socket.on('connected', function(name) { // the client tells us they're connected and who they are
 		
+		var player_found = false;
+		
 		// check to see if the name exists already
 		for (var i = 0; i < players; i++) {
 			if (players[i].name == name) { // if so, send along their info
@@ -139,45 +141,54 @@ io.sockets.on('connection', function(socket) {
 				if (valueInArray(player.area, active_areas) == false) { active_areas.push(player.area); } // add area to tracked areas
 				socket.emit('welcome', player);
 				socket.broadcast.volatile.to(player.area).emit('updatePlayer', player);
-				return;
+				player_found = true;
 			}
 		}
 		
-		// if not, see if they are in the database
-		players_db.findOne({ 'name': name }, function(err, playerRecord) {
-			if (err) { console.log(err); return; }
-			player = new Player(); // set up new player object
-			if (playerRecord != undefined) {
-				// player found in database -- use that info
-				console.log('returning player!');
-				player.name = playerRecord.name;
-				player.x = playerRecord.position.x;
-				player.y = playerRecord.position.y;
-				player.angle = playerRecord.position.angle;
-				player.area = '' + playerRecord.position.area + '';
-				player.objID = '' + playerRecord['_id'] + '';
-			} else {
-				// player NOT found... create new
-				console.log('new player!');
-				player.name = name;
-				player.area = starting_area_id; // starting area mongodb ID
-				var newplayer_doc = { 'name': name, 'position': { 'x': 2, 'y': 2, 'z': 0, 'angle': 0, 'area': player.area } };
-				players_db.insert(newplayer_doc);
-				player.objID = '' + newplayer_doc['_id'] + ''; // their new mongodb ID
-				console.log('new player ID: ' + player.objID);
-				areas_db.update( {'name': 'starting area'}, {'$push': { 'players': newplayer_doc['_id'] } } );
-			}
-			console.log(player); // current player
-			// add new player to array of players
-			players.push(player);
-			socket.join(player.area); // join the zone they're in
-			if (valueInArray(player.area, active_areas) == false) { active_areas.push(player.area); } // add area to tracked areas
-			socket.emit('welcome', player);
-			socket.broadcast.volatile.to(player.area).emit('updatePlayer', player); // send to all players this new player's attributes
-		});
+		if (player_found == false) {
+			// if not, see if they are in the database
+			players_db.findOne({ 'name': name }, function(err, playerRecord) {
+				if (err) { console.log(err); return; }
+				player = new Player(); // set up new player object
+				if (playerRecord != undefined) {
+					// player found in database -- use that info
+					console.log('returning player!');
+					player.name = playerRecord.name;
+					player.x = playerRecord.position.x;
+					player.y = playerRecord.position.y;
+					player.angle = playerRecord.position.angle;
+					player.area = '' + playerRecord.position.area + '';
+					player.objID = '' + playerRecord['_id'] + '';
+				} else {
+					// player NOT found... create new
+					console.log('new player!');
+					player.name = name;
+					player.area = starting_area_id; // starting area mongodb ID
+					var newplayer_doc = { 'name': name, 'position': { 'x': 2, 'y': 2, 'z': 0, 'angle': 0, 'area': player.area } };
+					players_db.insert(newplayer_doc);
+					player.objID = '' + newplayer_doc['_id'] + ''; // their new mongodb ID
+					console.log('new player ID: ' + player.objID);
+					areas_db.update( {'name': 'starting area'}, {'$push': { 'players': newplayer_doc['_id'] } } );
+				}
+				console.log(player); // current player
+				// add new player to array of players
+				players.push(player);
+				socket.join(player.area); // join the zone they're in
+				if (valueInArray(player.area, active_areas) == false) { active_areas.push(player.area); } // add area to tracked areas
+				socket.emit('welcome', player);
+				socket.broadcast.volatile.to(player.area).emit('updatePlayer', player); // send to all players this new player's attributes
+			});
+		}
 		
+		// do these regardless
 		if (players.length > 0) { // if there's more than one other player...
 			socket.emit('otherPlayers', players); // give the new player the other players
+		}
+		
+		if (salvages.length > 0) {
+			for (var i = 0; i < salvages.length; i++) {
+				socket.emit('newSalvage', { id: salvages[i].id, x: salvages[i].x, y: salvages[i].y });
+			}
 		}
 		
 	});
