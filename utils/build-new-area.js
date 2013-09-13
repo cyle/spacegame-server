@@ -27,7 +27,7 @@ build:
 var argv = require('optimist').argv;
 
 if (argv.n == undefined || argv.n == true) {
-	console.log('no area name given');
+	console.log('no area name given, set with -n');
 	process.exit(1);
 } else {
 	console.log('new area name: ' + argv.n);
