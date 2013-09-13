@@ -285,12 +285,13 @@ setInterval(function() {
 	// rebuild active areas
 	active_areas = [];
 	for (var i = 0; i < players.length; i++) {
-		active_areas.push(players.area);
+		active_areas.push(players[i].area);
 	}
 	
 	// salvage-ables
-	if (salvages.length < 10) { // if it's less than 10, maybe make a new one?
+	if (salvages.length < 10 && players.length > 0) { // if it's less than 10, maybe make a new one?
 		if (randomInt(0, 1000) > 500) { // chance high for development
+			//console.log('making a new salvage object!');
 			var salvage = new Salvage( active_areas[0] );
 			salvages.push(salvage);
 			io.sockets.in(salvage.area).emit('newSalvage', { id: salvage.id, x: salvage.x, y: salvage.y });
