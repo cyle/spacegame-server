@@ -320,6 +320,33 @@ io.sockets.on('connection', function(socket) {
 		}
 	});
 	
+	// player is jumping to a new area!
+	socket.on('area-jump', function(data) {
+		console.log('player is trying to make a subspace jump!');
+		console.log(data);
+		var area_query = {};
+		if (data.name != undefined) {
+			area_query = { 'name': data.name };
+		} else if (data.id != undefined) {
+			area_query = { '_id': new ObjectId(data.id) };
+		} else {
+			console.log('error: user supplied no means of finding what area to jump to.');
+			return;
+		}
+		areas_db.findOne(area_query, function(err, areaRecord) {
+			if (err) { console.log(err); return; }
+			if (areaRecord == undefined) { console.log('could not find the queried area'); return; }
+			// remove the player from their current mongodb area record location
+			areas_db.update({'_id': new ObjectId(player.area) }, {'$pull': { 'players': new ObjectId(player.objID) } });
+			// add the player to the new mongodb area record location
+			areas_db.update({'_id': areaRecord['_id'] }, {'$push': { 'players': new ObjectId(player.objID) } });
+			player.area = '' + areaRecord['_id'] + ''; // update the server's active player record
+			player.x = 10;
+			player.y = 10;
+			socket.emit('area-jump-result', { x: player.x, y: player.y, newArea: areaRecord});
+		});
+	});
+	
 });
 
 
