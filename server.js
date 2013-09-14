@@ -184,7 +184,9 @@ io.sockets.on('connection', function(socket) {
 					console.log('new player!');
 					player.name = name;
 					player.area = starting_area_id; // starting area mongodb ID
-					var newplayer_doc = { 'name': name, 'position': { 'x': 2, 'y': 2, 'z': 0, 'angle': 0, 'area': player.area } };
+					player.x = 3;
+					player.y = 3;
+					var newplayer_doc = { 'name': name, 'position': { 'x': player.x, 'y': player.y, 'z': 0, 'angle': 0, 'area': player.area } };
 					players_db.insert(newplayer_doc);
 					player.objID = '' + newplayer_doc['_id'] + ''; // their new mongodb ID
 					console.log('new player ID: ' + player.objID);
