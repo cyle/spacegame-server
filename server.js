@@ -202,14 +202,35 @@ io.sockets.on('connection', function(socket) {
 			});
 		}
 		
-		// do these regardless
+	});
+	
+	// fetch current area data when player asks for it
+	socket.on('get-current-area-extra', function() {
+		
+		// send stuff that's only relevant to the player's current area
+		
+		console.log('was just asked by '+player.name+' in area '+player.area+' for current area extra info');
+		
+		// send along other players in the same area
 		if (players.length > 0) { // if there's more than one other player...
-			socket.emit('otherPlayers', players); // give the new player the other players
+			var players_in_same_area = [];
+			for (var i = 0; i < players.length; i++) {
+				if (players[i].name == player.name) {
+					continue;
+				}
+				if (players[i].area == player.area) {
+					players_in_same_area.push(players[i]);
+				}
+			}
+			socket.emit('otherPlayers', players_in_same_area); // give the new player the other players
 		}
 		
+		// send along salvages in this area
 		if (salvages.length > 0) {
 			for (var i = 0; i < salvages.length; i++) {
-				socket.emit('newSalvage', { id: salvages[i].id, x: salvages[i].x, y: salvages[i].y });
+				if (salvages[i].area == player.area) {
+					socket.emit('newSalvage', { id: salvages[i].id, x: salvages[i].x, y: salvages[i].y });
+				}
 			}
 		}
 		
@@ -322,7 +343,7 @@ io.sockets.on('connection', function(socket) {
 	
 	// player is jumping to a new area!
 	socket.on('area-jump', function(data) {
-		console.log('player is trying to make a subspace jump!');
+		console.log('player '+player.name+' is trying to make a subspace jump!');
 		console.log(data);
 		var area_query = {};
 		if (data.name != undefined) {
@@ -336,14 +357,19 @@ io.sockets.on('connection', function(socket) {
 		areas_db.findOne(area_query, function(err, areaRecord) {
 			if (err) { console.log(err); return; }
 			if (areaRecord == undefined) { console.log('could not find the queried area'); return; }
+			console.log('player '+player.name+' jump successful');
 			// remove the player from their current mongodb area record location
 			areas_db.update({'_id': new ObjectId(player.area) }, {'$pull': { 'players': new ObjectId(player.objID) } });
+			socket.broadcast.to(player.area).emit('removePlayer', player.name); // tell everyone the player is gone
+			socket.leave(player.area);
 			// add the player to the new mongodb area record location
 			areas_db.update({'_id': areaRecord['_id'] }, {'$push': { 'players': new ObjectId(player.objID) } });
 			player.area = '' + areaRecord['_id'] + ''; // update the server's active player record
 			player.x = 10;
 			player.y = 10;
+			socket.join(player.area); // join the zone they're in
 			socket.emit('area-jump-result', { x: player.x, y: player.y, newArea: areaRecord});
+			socket.broadcast.to(player.area).volatile.emit('updatePlayer', player); // send this updated player data out to other clients
 		});
 	});
 	
