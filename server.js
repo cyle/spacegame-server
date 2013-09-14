@@ -226,11 +226,20 @@ io.sockets.on('connection', function(socket) {
 	});
 	
 	// fetch and send full data about an area based on given ID
-	socket.on('get-area', function(area_id) {
+	socket.on('get-area-by-id', function(area_id) {
 		var area_objID = new ObjectId(area_id);
 		areas_db.findOne({ '_id': area_objID }, function(err, areaRecord) {
 			if (err) { console.log(err); return; }
 			if (areaRecord == undefined) { console.log('could not find an area with the ID ' + area_id); return; }
+			socket.emit('area-data', areaRecord);
+		});
+	});
+	
+	// fetch and send full data about an area based on given name
+	socket.on('get-area-by-name', function(area_name) {
+		areas_db.findOne({ 'name': area_name }, function(err, areaRecord) {
+			if (err) { console.log(err); return; }
+			if (areaRecord == undefined) { console.log('could not find an area with the name ' + area_name); return; }
 			socket.emit('area-data', areaRecord);
 		});
 	});
@@ -284,6 +293,7 @@ io.sockets.on('connection', function(socket) {
 		bullets.push( new Bullet(player.area, player.x, player.y, player.angle, data.weaponType, player.name) );
 	});
 	
+	// when a player tries to salvage, see if they find anything
 	socket.on('salvage', function() {
 		console.log('player '+player.name+' trying to salvage object in area ' + player.area);
 		//console.log('players x: '+player.x+', y: '+player.y+', angle: ' + player.angle)
