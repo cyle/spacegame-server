@@ -82,10 +82,11 @@ if (argv.h == undefined || argv.h == true) {
 
 
 // make an asteroid field
-var asteroid_field_x = 125;
-var asteroid_field_y = 65;
-var asteroid_field_size = 50;
-for (var i = 0; i < 50; i++) {
+var asteroid_field_size = 200;
+var num_asteroids = asteroid_field_size/2;
+var asteroid_field_x = randomBetween(asteroid_field_size, new_area.width - asteroid_field_size);
+var asteroid_field_y = randomBetween(asteroid_field_size, new_area.height - asteroid_field_size);;
+for (var i = 0; i < num_asteroids; i++) {
 	var new_asteroid = {};
 	new_asteroid.type = 'asteroid';
 	new_asteroid.x = randomBetween(asteroid_field_x, asteroid_field_x + asteroid_field_size);
@@ -96,26 +97,26 @@ for (var i = 0; i < 50; i++) {
 }
 
 // make a safe zone
-var new_safezone1 = {};
-new_safezone1.type = 'safezone';
-new_safezone1.x = 5;
-new_safezone1.y = 10;
-new_safezone1.z = 0;
-new_safezone1.width = 10;
-new_safezone1.height = 20;
-new_safezone1.depth = 3;
-new_area.stuff.push(new_safezone1);
+// var new_safezone1 = {};
+// new_safezone1.type = 'safezone';
+// new_safezone1.x = 5;
+// new_safezone1.y = 10;
+// new_safezone1.z = 0;
+// new_safezone1.width = 10;
+// new_safezone1.height = 20;
+// new_safezone1.depth = 3;
+// new_area.stuff.push(new_safezone1);
 
 // make a nebula
-var new_nebula1 = {};
-new_nebula1.type = 'nebula';
-new_nebula1.x = 40;
-new_nebula1.y = 65;
-new_nebula1.z = 0;
-new_nebula1.width = 20;
-new_nebula1.height = 20;
-new_nebula1.depth = 3;
-new_area.stuff.push(new_nebula1);
+// var new_nebula1 = {};
+// new_nebula1.type = 'nebula';
+// new_nebula1.x = 40;
+// new_nebula1.y = 65;
+// new_nebula1.z = 0;
+// new_nebula1.width = 20;
+// new_nebula1.height = 20;
+// new_nebula1.depth = 3;
+// new_area.stuff.push(new_nebula1);
 
 /*
 
@@ -124,6 +125,9 @@ new_area.stuff.push(new_nebula1);
 */
 
 //console.log( new_area );
-areas.insert( new_area );
-
-console.log('done');
+areas.insert( new_area, function(err, val) {
+	if (err) { console.log(err); return; }
+	console.log('new area ID: ' + val['_id'] + '');
+	console.log('done');
+	process.exit();
+} );
