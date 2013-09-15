@@ -24,6 +24,7 @@ build:
 		
 */
 
+var Zone = require('./area-utils.js');
 var argv = require('optimist').argv;
 
 if (argv.n == undefined || argv.n == true) {
@@ -31,6 +32,11 @@ if (argv.n == undefined || argv.n == true) {
 	process.exit(1);
 } else {
 	console.log('new area name: ' + argv.n);
+}
+
+if (argv.n == 'starting area') {
+	console.log('you cannot set the area name to \'starting area\'');
+	process.exit(1);
 }
 
 // randomness function, yay
@@ -83,14 +89,18 @@ if (argv.h == undefined || argv.h == true) {
 
 // make an asteroid field
 var asteroid_field_size = 200;
-var num_asteroids = asteroid_field_size/2;
-var asteroid_field_x = randomBetween(asteroid_field_size, new_area.width - asteroid_field_size);
-var asteroid_field_y = randomBetween(asteroid_field_size, new_area.height - asteroid_field_size);;
-for (var i = 0; i < num_asteroids; i++) {
+var asteroid_field_center_x = randomBetween(asteroid_field_size/2, new_area.width - asteroid_field_size/2);
+var asteroid_field_center_y = randomBetween(asteroid_field_size/2, new_area.height - asteroid_field_size/2);
+
+//var asteroids = Zone.createAsteroidField(asteroid_field_center_x, asteroid_field_center_y, asteroid_field_size, asteroid_field_size);
+//var asteroids = Zone.createAsteroidCircle(asteroid_field_center_x, asteroid_field_center_y, 50);
+var asteroids = Zone.createAsteroidRing(asteroid_field_center_x, asteroid_field_center_y, 50, undefined, true);
+
+for (var i = 0; i < asteroids.length; i++) {
 	var new_asteroid = {};
 	new_asteroid.type = 'asteroid';
-	new_asteroid.x = randomBetween(asteroid_field_x, asteroid_field_x + asteroid_field_size);
-	new_asteroid.y = randomBetween(asteroid_field_y, asteroid_field_y + asteroid_field_size);
+	new_asteroid.x = asteroids[i].x;
+	new_asteroid.y = asteroids[i].y;
 	new_asteroid.z = 0;
 	new_asteroid.model = { 'type': 'sphere', 'size': randomBetween(1, 3), 'seg': 3, 'color': { 'r': 0.6, 'g': 0.3, 'b': 0.0, 'a': 1.0 } };
 	new_area.stuff.push(new_asteroid);
