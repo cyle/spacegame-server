@@ -115,6 +115,9 @@ function radiansToDegrees(radians) {
 
 */
 
+// this will hold onto all areas by ID
+var areas = [];
+
 // this will hold onto all area IDs that contain players
 var active_areas = [];
 
@@ -242,6 +245,7 @@ io.sockets.on('connection', function(socket) {
 		areas_db.findOne({ 'players': player_objID }, function(err, areaRecord) {
 			if (err) { console.log(err); return; }
 			if (areaRecord == undefined) { console.log('could not find where the current player is'); return; }
+			if (areas[''+areaRecord['_id']+''] == undefined) { areas[''+areaRecord['_id']+''] = areaRecord; } // if area not being tracked yet, track it
 			socket.emit('current-area-data', areaRecord);
 		});
 	});
@@ -368,6 +372,7 @@ io.sockets.on('connection', function(socket) {
 			player.x = 10;
 			player.y = 10;
 			socket.join(player.area); // join the zone they're in
+			if (areas[''+areaRecord['_id']+''] == undefined) { areas[''+areaRecord['_id']+''] = areaRecord; } // if area not being tracked yet, track it
 			socket.emit('area-jump-result', { x: player.x, y: player.y, newArea: areaRecord});
 			socket.broadcast.to(player.area).volatile.emit('updatePlayer', player); // send this updated player data out to other clients
 		});
