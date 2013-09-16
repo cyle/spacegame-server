@@ -36,6 +36,14 @@ function pointInsideRotatedRect(rx, ry, rw, rh, rot, px, py) {
 	}
 }
 
+function degreesToRadians(degrees) {
+	return degrees * (Math.PI/180);
+}
+
+function radiansToDegrees(radians) {
+	return radians * (180/Math.PI);
+}
+
 // creates standard rectangle-shaped asteroid field
 exports.createAsteroidField = function(centerX, centerY, width, height, density) {
 	var field = [];
@@ -176,8 +184,88 @@ exports.createAsteroidRing = function(centerX, centerY, radius, density, hasLane
 }
 
 // creates a randomly-pivoting belt of asteroids starting at given coords
-exports.createAsteroidBelt = function(startX, startY, maxWidth, maxHeight) {
+exports.createAsteroidBelt = function(startX, startY, maxWidth, maxHeight, bufferDistance, avgBeltLength, density) {
 	var field = [];
+	
+	var asteroidBufferDistance = bufferDistance;
+	var angleMin = degreesToRadians(10);
+	var angleMax = degreesToRadians(60);
+	var minDistance = avgBeltLength * 0.5;
+	var maxDistance = avgBeltLength * 1.5;
+	var avgDistance = avgBeltLength;
+	var steps = Math.ceil(maxWidth/avgDistance) + 1;
+	var maxX = startX + maxWidth;
+	var maxY = startY + maxHeight/2;
+	var minY = startY - maxHeight/2;
+	var field_area = avgDistance * (asteroidBufferDistance * 2); // area per step
+	var num_asteroids = 0;
+	if (density != undefined) {
+		num_asteroids = field_area * density;
+	} else {
+		num_asteroids = field_area * randomFloat(0.005, 0.03);
+	}
+	num_asteroids = Math.round(num_asteroids);
+	
+	var totalWidth = 0;
+	var numLanes = 0;
+	var lastX = startX;
+	var lastY = startY;
+
+	for (var i = 0; i < steps; i++) {
+		
+		console.log('step #' + i);
+		
+		var distanceAway = randomFloat(minDistance, maxDistance);
+		var angle = randomFloat(angleMin, angleMax);
+
+		if (randomFloat(0, 100) > 50) {
+			angle = angle * -1;
+		}
+
+		var nextX = lastX + Math.cos(angle) * distanceAway;
+		var nextY = lastY + Math.sin(angle) * distanceAway;
+
+		if (nextY - asteroidBufferDistance < minY || nextY + asteroidBufferDistance > maxY) {
+			i = i - 1;
+			continue;
+		}
+
+		if (nextX + asteroidBufferDistance > maxX) {
+			break;
+		}
+
+		var laneX = 0;
+		var laneY = 0;
+		var laneWidth = randomFloat(20, 40);
+		var laneHeight = 150;
+
+		if (randomFloat(0, 100) > 45) {
+			var laneHowFarAlong = distanceAway * randomFloat(0.2, 0.8);
+			laneX = lastX + Math.cos(angle) * laneHowFarAlong;
+			laneY = lastY + Math.sin(angle) * laneHowFarAlong;
+			numLanes += 1;
+		}
+
+		for (var k = 0; k < num_asteroids; k++) {
+			var a = {};
+			var howFarAlong = distanceAway * Math.random();
+			a.x = lastX + Math.cos(angle) * howFarAlong;
+			a.y = lastY + Math.sin(angle) * howFarAlong;
+			a.x = a.x + randomFloat(-asteroidBufferDistance, asteroidBufferDistance);
+			a.y = a.y + randomFloat(-asteroidBufferDistance, asteroidBufferDistance);
+			if (laneX != 0 && laneY != 0 && pointInsideRotatedRect(laneX, laneY, laneWidth, laneHeight, angle, a.x, a.y)) {
+				k = k - 1;
+			} else {
+				field.push(a);
+			}
+		}
+
+		totalWidth += nextX - lastX;
+
+		lastX = nextX;
+		lastY = nextY;
+
+	}
 	
 	return field;
 }
