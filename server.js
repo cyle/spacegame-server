@@ -67,6 +67,25 @@ function pointInsideRotatedRect(rx, ry, rw, rh, rot, px, py) {
 	}
 }
 
+// rect center X, rect center Y, rect width, rect height, point X, point Y
+function pointInsideRectangle(rx, ry, rw, rh, px, py) {
+	var top = ry + rh/2;
+	var right = rx + rw/2;
+	var bottom = ry - rh/2;
+	var left = rx - rw/2;
+	if (px > right || px < left) {
+		return false;
+	} else if (py > top || py < bottom) {
+		return false
+	} else {
+		if (px > left && px < right && py > bottom && py < top) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+}
+
 function pointInsideCircle(cx, cy, r, px, py) {
 	var square_dist = Math.pow((cx - px), 2) + Math.pow((cy - py), 2);
 	if (square_dist <= Math.pow(r, 2)) {
@@ -561,10 +580,26 @@ Bullet.prototype.update = function(dTime) {
 
 Bullet.prototype.checkCollisions = function() {	
 	// this should go into all of the other players' ships,
-	// all of the other destroyable objects
+	// all of the other destroyable objects in its area
 	// and say whether it has hit or not
 	
-	var playerSize = 2;
+	// check through stuff in the zone
+	for (var i = 0; i < areas[this.area].stuff.length; i++) {
+		var this_thing = areas[this.area].stuff[i];
+		// if the bullet enters a safe zone, it's done
+		if (this_thing.type == 'safezone' && pointInsideRectangle(this_thing.x, this_thing.y, this_thing.width, this_thing.height, this.x, this.y)) {
+			console.log('bullet entered safe zone, removing...');
+			this.done = true;
+			return;
+		} else if (this_thing.type == 'asteroid' && pointInsideCircle(this_thing.x, this_thing.y, this_thing.model.size/2, this.x, this.y)) { // if the bullet hits an asteroid, show an explosion
+			console.log('bullet hit asteroid');
+			this.didHit = { x: this.x, y: this.y, playerName: 'asteroid' };
+			return;
+		}
+	}
+	
+	// check to see if it hit another player
+	var playerSize = 2; // use this as the player ships' bounding box, for now
 	
 	// go through all of the players' ships
 	for (var i = 0; i < players.length; i++) {
@@ -578,9 +613,6 @@ Bullet.prototype.checkCollisions = function() {
 			}
 		}
 	}
-	
-	// go through all of the environment destructable objects
-	
 	
 }
 
