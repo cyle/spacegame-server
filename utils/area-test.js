@@ -8,8 +8,8 @@ var Zone = require('./area-utils.js');
 //console.log('new asteroid circle:');
 //console.log(Zone.createAsteroidCircle(100, 100, 50));
 
-console.log('new asteroid ring:');
-console.log(Zone.createAsteroidRing(100, 100, 50, undefined, true));
+//console.log('new asteroid ring:');
+//console.log(Zone.createAsteroidRing(100, 100, 50, undefined, true));
 
 //console.log('new asteroid belt:');
-//console.log(Zone.createAsteroidBelt(100, 100, 100, 100));
+//console.log(Zone.createAsteroidBelt(50, 200, 300, 200, 25, 50));

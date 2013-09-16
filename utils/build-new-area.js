@@ -94,7 +94,8 @@ var asteroid_field_center_y = randomBetween(asteroid_field_size/2, new_area.heig
 
 //var asteroids = Zone.createAsteroidField(asteroid_field_center_x, asteroid_field_center_y, asteroid_field_size, asteroid_field_size);
 //var asteroids = Zone.createAsteroidCircle(asteroid_field_center_x, asteroid_field_center_y, 50);
-var asteroids = Zone.createAsteroidRing(asteroid_field_center_x, asteroid_field_center_y, 50, undefined, true);
+//var asteroids = Zone.createAsteroidRing(asteroid_field_center_x, asteroid_field_center_y, 50, undefined, true);
+var asteroids = Zone.createAsteroidBelt(25, new_area.height/2, new_area.width, new_area.height, 25, 25);
 
 for (var i = 0; i < asteroids.length; i++) {
 	var new_asteroid = {};
@@ -102,6 +103,8 @@ for (var i = 0; i < asteroids.length; i++) {
 	new_asteroid.x = asteroids[i].x;
 	new_asteroid.y = asteroids[i].y;
 	new_asteroid.z = 0;
+	// chance to be large?
+	// chance to be special/red?
 	new_asteroid.model = { 'type': 'sphere', 'size': randomBetween(1, 3), 'seg': 3, 'color': { 'r': 0.6, 'g': 0.3, 'b': 0.0, 'a': 1.0 } };
 	new_area.stuff.push(new_asteroid);
 }
