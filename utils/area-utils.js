@@ -98,7 +98,10 @@ exports.createAsteroidCircle = function(centerX, centerY, radius, blankSpace, de
 	
 	var blank = undefined;
 	if (typeof blankSpace === 'object') {
-		blank = blankSpace;
+		blank = {};
+		blank.x = centerX + blankSpace.x;
+		blank.y = centerY + blankSpace.y;
+		blank.r = blankSpace.r;
 	} else if (blankSpace == true || (blankSpace == undefined && randomInt(0, 100) > 50)) {
 		blank = {};
 		// there IS a blank space
