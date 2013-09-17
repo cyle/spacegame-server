@@ -102,6 +102,7 @@ exports.createAsteroidCircle = function(centerX, centerY, radius, blankSpace, de
 		blank.x = centerX + blankSpace.x;
 		blank.y = centerY + blankSpace.y;
 		blank.r = blankSpace.r;
+		console.log('blank space radius: ' + blank.r);
 	} else if (blankSpace == true || (blankSpace == undefined && randomInt(0, 100) > 50)) {
 		blank = {};
 		// there IS a blank space
@@ -116,6 +117,7 @@ exports.createAsteroidCircle = function(centerX, centerY, radius, blankSpace, de
 		blank.x = centerX + (radius * blank_r) * Math.cos(blank_t);
 		blank.y = centerY + (radius * blank_r) * Math.sin(blank_t);
 		blank.r = randomFloat(radius/5, radius/3);
+		console.log('blank space radius: ' + blank.r);
 	}
 	
 	for (var i = 0; i < num_asteroids; i++) {
@@ -135,7 +137,6 @@ exports.createAsteroidCircle = function(centerX, centerY, radius, blankSpace, de
 			if (square_dist > Math.pow(blank.r, 2)) {
 				field.push(a);
 			} else {
-				console.log('asteroid in blank space, trying again...');
 				i = i - 1;
 			}
 		} else {
