@@ -25,7 +25,7 @@ foreach ($get_areas as $area) {
 ?>
 <div>
 <h2><?php echo $area['name']; ?> / <?php echo $area['_id']; ?></h2>
-<canvas id="area-<?php echo $area['_id']; ?>" style="border:1px solid #ddd;background-color:#fff;" width="<?php echo $area['width'] * $grid_scale; ?>px" height="<?php echo $area['height'] * $grid_scale; ?>px"></canvas>
+<canvas id="area-<?php echo $area['_id']; ?>" style="border:1px solid #ddd;background-color:#000;" width="<?php echo $area['width'] * $grid_scale; ?>px" height="<?php echo $area['height'] * $grid_scale; ?>px"></canvas>
 </div>
 <script>
 var canvas = document.getElementById('area-<?php echo $area['_id']; ?>');
