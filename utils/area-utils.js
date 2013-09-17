@@ -4,6 +4,7 @@
 
 */
 
+// return a random integer
 function randomInt(min, max) {
 	if (max == undefined) { // assume it's between 0 and whatever
 		return Math.floor(Math.random() * (min + 1));
@@ -12,6 +13,7 @@ function randomInt(min, max) {
 	}
 }
 
+// return a random float
 function randomFloat(min, max) {
 	if (max == undefined) { // assume it's between 0 and whatever
 		return Math.random() * min;
@@ -20,6 +22,7 @@ function randomFloat(min, max) {
 	}
 }
 
+// return whether or not a point is within a rotated rectangle
 // rect center X, rect center Y, rect width, rect height, rect rotation (radians), point X, point Y
 function pointInsideRotatedRect(rx, ry, rw, rh, rot, px, py) {
 	var dx = px - rx;
@@ -45,6 +48,8 @@ function radiansToDegrees(radians) {
 }
 
 // creates standard rectangle-shaped asteroid field
+//   centerX, centerY, width, and height are all required
+//   density helps determine how many asteroids are within the rectangle (optional)
 exports.createAsteroidField = function(centerX, centerY, width, height, density) {
 	var field = [];
 	
@@ -72,7 +77,12 @@ exports.createAsteroidField = function(centerX, centerY, width, height, density)
 }
 
 // creates a circle-shaped field of asteroids, with a potential blank space inside
-exports.createAsteroidCircle = function(centerX, centerY, radius, density) {
+//   centerX, centerY, and radius are required
+//   blankSpace explicity sets whether there's a blank space inside the circle somewhere (if undefined, there's a chance) (optional)
+//     or, you can set blankSpace to be an object where you'd like the blank space to be, relative to the center
+//     so setting blankSpace to { x: 10, y: 10, r: 25 } makes a 25-radius blank space centerX + 10 and centerY + 10
+//   density helps determine how many asteroids are within the circle (optional)
+exports.createAsteroidCircle = function(centerX, centerY, radius, blankSpace, density) {
 	var field = [];
 	
 	var field_area = Math.PI * (radius * radius);
@@ -87,7 +97,9 @@ exports.createAsteroidCircle = function(centerX, centerY, radius, density) {
 	console.log('number of asteroids in circle: ' + num_asteroids);
 	
 	var blank = undefined;
-	if (randomInt(0, 1000) > 500) {
+	if (typeof blankSpace === 'object') {
+		blank = blankSpace;
+	} else if (blankSpace == true || (blankSpace == undefined && randomInt(0, 100) > 50)) {
 		blank = {};
 		// there IS a blank space
 		var blank_t = randomFloat(0, Math.PI * 2);
@@ -132,28 +144,54 @@ exports.createAsteroidCircle = function(centerX, centerY, radius, density) {
 }
 
 // creates a ring of asteroids around a center point
-exports.createAsteroidRing = function(centerX, centerY, radius, density, hasLanes) {
+//   centerX, centerY, and outerRadius are all required
+//   innerRadius explicitly sets how large the "blank space" in the center is, default = random
+//   density explicitly sets how dense the asteroid field is, default = random
+//   hasLanes explicitly sets whether the ring has lanes cut through it, default = false
+//   fuzzy explicitly sets whether the ring is a tight circle or is a little looser, default = false
+exports.createAsteroidRing = function(centerX, centerY, outerRadius, innerRadius, density, hasLanes, fuzzy) {
 	var field = [];
 	
-	var field_area = Math.PI * (radius * radius);
-	var blankRadius = randomFloat(radius/2, radius - radius/8);
-	console.log('blank radius: ' + blankRadius);
+	console.log('new asteroid ring');
+	console.log('outer radius: ' + outerRadius)
+	
+	if (innerRadius == undefined) {
+		innerRadius = randomFloat(outerRadius/4, outerRadius - outerRadius/8);
+	}
+	console.log('blank inner radius: ' + innerRadius);
+	
+	var field_area = (Math.PI * (outerRadius * outerRadius)) - (Math.PI * (innerRadius * innerRadius));
+	console.log('total area in the ring: ' + field_area);
+	
 	var num_asteroids = 0;
 	if (density != undefined) {
 		num_asteroids = field_area * density;
 	} else {
-		num_asteroids = field_area * randomFloat(0.005, 0.03);
+		num_asteroids = field_area * randomFloat(0.005, 0.05);
 	}
 	num_asteroids = Math.round(num_asteroids);
-	
 	console.log('number of asteroids in ring: ' + num_asteroids);
 	
-	var lane = undefined;
+	if (fuzzy == undefined) {
+		fuzzy = false;
+		console.log('ring will NOT be fuzzy');
+	} else if (fuzzy) {
+		fuzzy = true;
+		console.log('ring will totally be fuzzy');
+	}
+	
+	var lanes = undefined;
 	if (hasLanes) {
-		lane = {};
-		lane.angle = randomFloat(0, Math.PI * 2);
-		lane.width = randomFloat(radius/5, radius/3);
-		console.log('lane angle: ' + lane.angle + ', width: ' + lane.width);
+		var num_lanes = randomInt(1, 4);
+		lanes = [];
+		for (var l = 0; l < num_lanes; l++) {
+			lanes[l] = {};
+			lanes[l].angle = randomFloat(0, Math.PI * 2);
+			lanes[l].width = randomFloat(outerRadius/5, outerRadius/3);
+			lanes[l].x = centerX + (outerRadius * Math.cos(lanes[l].angle));
+			lanes[l].y = centerY + (outerRadius * Math.sin(lanes[l].angle));
+			console.log('lane x: '+lanes[l].x+', y: '+lanes[l].y+', angle: ' + lanes[l].angle + ', width: ' + lanes[l].width);
+		}
 	}
 	
 	for (var i = 0; i < num_asteroids; i++) {
@@ -166,12 +204,28 @@ exports.createAsteroidRing = function(centerX, centerY, radius, density, hasLane
 		} else {
 			r = u;
 		}
-		a.x = centerX + (radius * r) * Math.cos(t);
-		a.y = centerY + (radius * r) * Math.sin(t);
+		var workingOuterRadius = outerRadius;
+		var workingInnerRadius = innerRadius;
+		if (fuzzy && randomInt(0, 100) > 80) {
+			workingOuterRadius += outerRadius * 0.1;
+			workingInnerRadius -= innerRadius * 0.1;
+		}
+		a.x = centerX + (workingOuterRadius * r) * Math.cos(t);
+		a.y = centerY + (workingOuterRadius * r) * Math.sin(t);
 		var square_dist = Math.pow(centerX - a.x, 2) + Math.pow(centerY - a.y, 2);
-		if (square_dist > Math.pow(blankRadius, 2)) {
-			if (lane != undefined && pointInsideRotatedRect(centerX, centerY, lane.width, radius * 2, lane.angle, a.x, a.y)) {
-				i = i - 1;
+		if (square_dist > Math.pow(workingInnerRadius, 2)) {
+			if (lanes != undefined) {
+				var hit_lane = false;
+				for (var l = 0; l < lanes.length; l++) {
+					if (pointInsideRotatedRect(lanes[l].x, lanes[l].y, workingOuterRadius, lanes[l].width, lanes[l].angle, a.x, a.y)) {
+						hit_lane = true;
+					}
+				}
+				if (hit_lane) {
+					i = i - 1;
+				} else {
+					field.push(a);
+				}
 			} else {
 				field.push(a);
 			}
@@ -184,16 +238,29 @@ exports.createAsteroidRing = function(centerX, centerY, radius, density, hasLane
 }
 
 // creates a randomly-pivoting belt of asteroids starting at given coords
+// this works by going through a number of "belt steps" to create a pivoting set of connected points
+// and then forms asteroids around and along that path, which creates the actual belt
+//   startX and startY are where the belt begins (required)
+//   maxWidth and maxHeight are the limits of how large it can get (required)
+//   bufferDistance is how far away from the "belt steps" an asteroid can be placed (required)
+//   avgBeltLength is how long you'd like each "belt step" to be on average (required)
+//   density helps determine how many asteroids will be in the belt (optional)
 exports.createAsteroidBelt = function(startX, startY, maxWidth, maxHeight, bufferDistance, avgBeltLength, density) {
 	var field = [];
-	
+	console.log('new asteroid belt');
+	console.log('starting: x = '+startX+', y = '+startY);
+	console.log('max width = '+maxWidth+', max height = '+maxHeight);
+	console.log('buffer distance: '+bufferDistance);
 	var asteroidBufferDistance = bufferDistance;
-	var angleMin = degreesToRadians(10);
-	var angleMax = degreesToRadians(60);
+	var angleMin = degreesToRadians(randomInt(0, 360));
+	var angleMax = angleMin + degreesToRadians(50);
+	console.log('angle min: '+radiansToDegrees(angleMin)+', max: '+radiansToDegrees(angleMax));
 	var minDistance = avgBeltLength * 0.5;
 	var maxDistance = avgBeltLength * 1.5;
 	var avgDistance = avgBeltLength;
+	console.log('min belt length distance: '+minDistance+', max: '+maxDistance+', avg: '+avgDistance);
 	var steps = Math.ceil(maxWidth/avgDistance) + 1;
+	console.log('max steps in belt: ' + steps);
 	var maxX = startX + maxWidth;
 	var maxY = startY + maxHeight/2;
 	var minY = startY - maxHeight/2;
@@ -205,7 +272,11 @@ exports.createAsteroidBelt = function(startX, startY, maxWidth, maxHeight, buffe
 		num_asteroids = field_area * randomFloat(0.005, 0.03);
 	}
 	num_asteroids = Math.round(num_asteroids);
+	console.log('number of asteroids per step: ' + num_asteroids);
 	
+	var maxAttempts = 10;
+	var numAttempts = 0;
+	var numSteps = 0;
 	var totalWidth = 0;
 	var numLanes = 0;
 	var lastX = startX;
@@ -213,7 +284,7 @@ exports.createAsteroidBelt = function(startX, startY, maxWidth, maxHeight, buffe
 
 	for (var i = 0; i < steps; i++) {
 		
-		console.log('step #' + i);
+		//console.log('step #' + i);
 		
 		var distanceAway = randomFloat(minDistance, maxDistance);
 		var angle = randomFloat(angleMin, angleMax);
@@ -227,11 +298,16 @@ exports.createAsteroidBelt = function(startX, startY, maxWidth, maxHeight, buffe
 
 		if (nextY - asteroidBufferDistance < minY || nextY + asteroidBufferDistance > maxY) {
 			i = i - 1;
+			numAttempts++;
+			if (numAttempts > maxAttempts) { break; }
 			continue;
 		}
 
-		if (nextX + asteroidBufferDistance > maxX) {
-			break;
+		if (nextX + asteroidBufferDistance > maxX || nextX - asteroidBufferDistance > maxX) {
+			i = i - 1;
+			numAttempts++;
+			if (numAttempts > maxAttempts) { break; }
+			continue;
 		}
 
 		var laneX = 0;
@@ -264,8 +340,12 @@ exports.createAsteroidBelt = function(startX, startY, maxWidth, maxHeight, buffe
 
 		lastX = nextX;
 		lastY = nextY;
+		
+		numSteps++;
 
 	}
+	
+	console.log('ended after ' + numSteps);
 	
 	return field;
 }

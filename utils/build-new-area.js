@@ -85,17 +85,14 @@ if (argv.h == undefined || argv.h == true) {
 
 */
 
-
-
 // make an asteroid field
-var asteroid_field_size = 200;
-var asteroid_field_center_x = randomBetween(asteroid_field_size/2, new_area.width - asteroid_field_size/2);
-var asteroid_field_center_y = randomBetween(asteroid_field_size/2, new_area.height - asteroid_field_size/2);
-
+var asteroid_field_size = new_area.width * 0.4;
+//var asteroid_field_center_x = randomBetween(asteroid_field_size/2, new_area.width - asteroid_field_size/2);
+//var asteroid_field_center_y = randomBetween(asteroid_field_size/2, new_area.height - asteroid_field_size/2);
 //var asteroids = Zone.createAsteroidField(asteroid_field_center_x, asteroid_field_center_y, asteroid_field_size, asteroid_field_size);
 //var asteroids = Zone.createAsteroidCircle(asteroid_field_center_x, asteroid_field_center_y, 50);
-//var asteroids = Zone.createAsteroidRing(asteroid_field_center_x, asteroid_field_center_y, 50, undefined, true);
-var asteroids = Zone.createAsteroidBelt(25, new_area.height/2, new_area.width, new_area.height, 25, 25);
+var asteroids = Zone.createAsteroidRing(new_area.width/2, new_area.height/2, asteroid_field_size, undefined, undefined, true, true);
+//var asteroids = Zone.createAsteroidBelt(randomBetween(10, new_area.width - 10), randomBetween(10, new_area.height - 10), new_area.width, new_area.height, randomBetween(20, 50), new_area.width/7);
 
 for (var i = 0; i < asteroids.length; i++) {
 	var new_asteroid = {};
