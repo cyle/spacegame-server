@@ -47,21 +47,18 @@ a.scale(-1, -1); // flip both because Babylon will render with bottom-right bein
 			echo 'a.rect('.((-$thing['width']/2) * $grid_scale).', '.((-$thing['height']/2) * $grid_scale).', '.($thing['width'] * $grid_scale).', '.($thing['height'] * $grid_scale).');'."\n";
 			echo 'a.fillStyle = "green";'."\n";
 			echo 'a.fill();'."\n";
-			// echo 'a.translate(0, 0);'."\n";
 		} else if ($thing['type'] == 'nebula') {
 			echo 'a.translate('.$thing['x'].', '.$thing['y'].');'."\n";
 			echo 'a.rotate('.$thing['r'].');'."\n";
 			echo 'a.rect('.((-$thing['width']/2) * $grid_scale).', '.((-$thing['height']/2) * $grid_scale).', '.($thing['width'] * $grid_scale).', '.($thing['height'] * $grid_scale).');'."\n";
 			echo 'a.fillStyle = "purple";'."\n";
 			echo 'a.fill();'."\n";
-			// echo 'a.translate(0, 0);'."\n";
 		} else if ($thing['type'] == 'ionstorm') {
 			echo 'a.translate('.$thing['x'].', '.$thing['y'].');'."\n";
 			echo 'a.rotate('.$thing['r'].');'."\n";
 			echo 'a.rect('.((-$thing['width']/2) * $grid_scale).', '.((-$thing['height']/2) * $grid_scale).', '.($thing['width'] * $grid_scale).', '.($thing['height'] * $grid_scale).');'."\n";
 			echo 'a.fillStyle = "#40E0D0";'."\n";
 			echo 'a.fill();'."\n";
-			// echo 'a.translate(0, 0);'."\n";
 		} else if ($thing['type'] == 'space-station') {
 			echo 'a.arc('.($thing['x'] * $grid_scale).', '.($thing['y'] * $grid_scale).', '.(($thing['model']['size']/2) * $grid_scale).', 0, 2 * Math.PI, false);'."\n";
 			echo 'a.fillStyle = "#000080";'."\n";
