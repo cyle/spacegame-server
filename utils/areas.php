@@ -34,29 +34,35 @@ a.translate(canvas.width, canvas.height);
 a.scale(-1, -1); // flip both because Babylon will render with bottom-right being x=0, y=0
 <?php
 	foreach ($area['stuff'] as $thing) {
+		echo 'a.save();'."\n";
+		echo 'a.beginPath();'."\n";
 		if ($thing['type'] == 'asteroid') {
-			echo 'a.beginPath();'."\n";
 			echo 'a.arc('.($thing['x'] * $grid_scale).', '.($thing['y'] * $grid_scale).', '.(($thing['model']['size']/2) * $grid_scale).', 0, 2 * Math.PI, false);'."\n";
 			echo 'a.fillStyle = "#8B4513";'."\n";
 			echo 'a.fill();'."\n";
 			echo 'a.closePath();'."\n";
 		} else if ($thing['type'] == 'safezone') {
-			echo 'a.beginPath();'."\n";
-			echo 'a.rect('.(($thing['x'] - $thing['width']/2) * $grid_scale).', '.(($thing['y'] - $thing['height']/2) * $grid_scale).', '.($thing['width'] * $grid_scale).', '.($thing['height'] * $grid_scale).');'."\n";
+			echo 'a.translate('.$thing['x'].', '.$thing['y'].');'."\n";
+			echo 'a.rotate('.$thing['r'].');'."\n";
+			echo 'a.rect('.((-$thing['width']/2) * $grid_scale).', '.((-$thing['height']/2) * $grid_scale).', '.($thing['width'] * $grid_scale).', '.($thing['height'] * $grid_scale).');'."\n";
 			echo 'a.fillStyle = "green";'."\n";
 			echo 'a.fill();'."\n";
+			// echo 'a.translate(0, 0);'."\n";
 		} else if ($thing['type'] == 'nebula') {
-			echo 'a.beginPath();'."\n";
-			echo 'a.rect('.(($thing['x'] - $thing['width']/2) * $grid_scale).', '.(($thing['y'] - $thing['height']/2) * $grid_scale).', '.($thing['width'] * $grid_scale).', '.($thing['height'] * $grid_scale).');'."\n";
+			echo 'a.translate('.$thing['x'].', '.$thing['y'].');'."\n";
+			echo 'a.rotate('.$thing['r'].');'."\n";
+			echo 'a.rect('.((-$thing['width']/2) * $grid_scale).', '.((-$thing['height']/2) * $grid_scale).', '.($thing['width'] * $grid_scale).', '.($thing['height'] * $grid_scale).');'."\n";
 			echo 'a.fillStyle = "purple";'."\n";
 			echo 'a.fill();'."\n";
+			// echo 'a.translate(0, 0);'."\n";
 		} else if ($thing['type'] == 'ionstorm') {
-			echo 'a.beginPath();'."\n";
-			echo 'a.rect('.(($thing['x'] - $thing['width']/2) * $grid_scale).', '.(($thing['y'] - $thing['height']/2) * $grid_scale).', '.($thing['width'] * $grid_scale).', '.($thing['height'] * $grid_scale).');'."\n";
+			echo 'a.translate('.$thing['x'].', '.$thing['y'].');'."\n";
+			echo 'a.rotate('.$thing['r'].');'."\n";
+			echo 'a.rect('.((-$thing['width']/2) * $grid_scale).', '.((-$thing['height']/2) * $grid_scale).', '.($thing['width'] * $grid_scale).', '.($thing['height'] * $grid_scale).');'."\n";
 			echo 'a.fillStyle = "#40E0D0";'."\n";
 			echo 'a.fill();'."\n";
-		} else if ($thing['type'] == 'station') {
-			echo 'a.beginPath();'."\n";
+			// echo 'a.translate(0, 0);'."\n";
+		} else if ($thing['type'] == 'space-station') {
 			echo 'a.arc('.($thing['x'] * $grid_scale).', '.($thing['y'] * $grid_scale).', '.(($thing['model']['size']/2) * $grid_scale).', 0, 2 * Math.PI, false);'."\n";
 			echo 'a.fillStyle = "#000080";'."\n";
 			echo 'a.fill();'."\n";
@@ -64,6 +70,7 @@ a.scale(-1, -1); // flip both because Babylon will render with bottom-right bein
 		} else {
 			// uhhh...?
 		}
+		echo 'a.restore();'."\n";
 	}
 ?>
 </script>
