@@ -73,8 +73,8 @@ new_safezone1.type = 'safezone';
 new_safezone1.x = new_area.width/2;
 new_safezone1.y = new_area.height/2;
 new_safezone1.z = 0;
-new_safezone1.width = 20;
-new_safezone1.height = 20;
+new_safezone1.width = 50;
+new_safezone1.height = 50;
 new_safezone1.depth = 3;
 new_area.stuff.push(new_safezone1);
 
