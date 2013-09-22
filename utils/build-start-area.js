@@ -42,11 +42,20 @@ new_area.height = 500;
 
 */
 
+// make a space station
+var spacestation = {};
+spacestation.type = 'space-station';
+spacestation.x = new_area.width/2;
+spacestation.y = new_area.height/2;
+spacestation.z = 0;
+spacestation.model = { 'type': 'sphere', 'size': 5, 'seg': 7, 'color': { 'r': 1, 'g': 1, 'b': 1, 'a': 1 } };
+new_area.stuff.push(spacestation);
+
 // make an asteroid ring
 var asteroid_field_size = 100;
 var asteroid_field_center_x = new_area.width/2;
 var asteroid_field_center_y = new_area.height/2;
-var asteroids = Zone.createAsteroidRing(asteroid_field_center_x, asteroid_field_center_y, asteroid_field_size, 0.03, true);
+var asteroids = Zone.createAsteroidRing(asteroid_field_center_x, asteroid_field_center_y, asteroid_field_size, asteroid_field_size/2, 0.03, true, true);
 
 for (var i = 0; i < asteroids.length; i++) {
 	var new_asteroid = {};
