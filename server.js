@@ -587,7 +587,7 @@ Bullet.prototype.checkCollisions = function() {
 	for (var i = 0; i < areas[this.area].stuff.length; i++) {
 		var this_thing = areas[this.area].stuff[i];
 		// if the bullet enters a safe zone, it's done
-		if (this_thing.type == 'safezone' && pointInsideRectangle(this_thing.x, this_thing.y, this_thing.width, this_thing.height, this.x, this.y)) {
+		if (this_thing.type == 'safezone' && pointInsideRotatedRect(this_thing.x, this_thing.y, this_thing.width, this_thing.height, this_thing.r, this.x, this.y)) {
 			console.log('bullet entered safe zone, removing...');
 			this.done = true;
 			return;
