@@ -4,6 +4,10 @@ This is the server half of **SPACE GAME!**
 
 To use it properly, you should get the client as well.
 
+## Important Note
+
+This is super alpha. There's a lot going on here, and it'll change all the time, most likely. So be aware that this documentation probably isn't 100% accurate, but I'll try to keep it updated as best I can.
+
 ## Dependencies
 
 - Node.js (version 0.10 or higher)

@@ -12,7 +12,7 @@ var ObjectId =  require('mongolian').ObjectId; // mongodb objectID type
 var sigil = require('sigil'); // my graph database client
 
 // set up mongodb connection
-var mongoserver = new Mongolian('spacegame.com'); // spacegame.com is /etc/host to a local VM
+var mongoserver = new Mongolian('spacegame.com'); // spacegame.com is /etc/hosts to a local VM
 var mdb = mongoserver.db('spacegame'); // the mongodb database called "spacegame"
 var players_db = mdb.collection('players');
 var areas_db = mdb.collection('areas');
