@@ -2,7 +2,7 @@
 
 This is the server half of **SPACE GAME!**
 
-To use it properly, you should get the client as well.
+To use it properly, you should get the [SPACE GAME! client](https://github.com/cyle/spacegame-client) as well.
 
 ## Important Note
 
