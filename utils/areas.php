@@ -41,6 +41,11 @@ a.scale(-1, -1); // flip both because Babylon will render with bottom-right bein
 			echo 'a.fillStyle = "#8B4513";'."\n";
 			echo 'a.fill();'."\n";
 			echo 'a.closePath();'."\n";
+		} else if ($thing['type'] == 'aperture') {
+			echo 'a.arc('.($thing['x'] * $grid_scale).', '.($thing['y'] * $grid_scale).', '.(($thing['model']['size']/2) * $grid_scale).', 0, 2 * Math.PI, false);'."\n";
+			echo 'a.fillStyle = "#00ff00";'."\n";
+			echo 'a.fill();'."\n";
+			echo 'a.closePath();'."\n";
 		} else if ($thing['type'] == 'safezone') {
 			echo 'a.translate('.$thing['x'].', '.$thing['y'].');'."\n";
 			echo 'a.rotate('.$thing['r'].');'."\n";
@@ -52,6 +57,12 @@ a.scale(-1, -1); // flip both because Babylon will render with bottom-right bein
 			echo 'a.rotate('.$thing['r'].');'."\n";
 			echo 'a.rect('.((-$thing['width']/2) * $grid_scale).', '.((-$thing['height']/2) * $grid_scale).', '.($thing['width'] * $grid_scale).', '.($thing['height'] * $grid_scale).');'."\n";
 			echo 'a.fillStyle = "purple";'."\n";
+			echo 'a.fill();'."\n";
+		} else if ($thing['type'] == 'dust-cloud') {
+			echo 'a.translate('.$thing['x'].', '.$thing['y'].');'."\n";
+			echo 'a.rotate('.$thing['r'].');'."\n";
+			echo 'a.rect('.((-$thing['width']/2) * $grid_scale).', '.((-$thing['height']/2) * $grid_scale).', '.($thing['width'] * $grid_scale).', '.($thing['height'] * $grid_scale).');'."\n";
+			echo 'a.fillStyle = "DarkKhaki";'."\n";
 			echo 'a.fill();'."\n";
 		} else if ($thing['type'] == 'ionstorm') {
 			echo 'a.translate('.$thing['x'].', '.$thing['y'].');'."\n";
