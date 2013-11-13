@@ -493,7 +493,10 @@ setInterval(function() {
 	// see if anybody's dead!
 	for (var i = 0; i < players.length; i++) {
 		if (players[i].hpCurrent <= 0) {
-			//console.log( players[i].name + ' is dead!');
+			console.log( players[i].name + ' is dead!');
+			// tell player they're dead...
+			io.sockets.in(players[i].area).emit('deadPlayer', players[i].name);
+			io.sockets.in(players[i].area).emit('removePlayer', players[i].name); // tell everyone the player is gone
 		}
 	}
 	
