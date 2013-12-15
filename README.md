@@ -41,7 +41,7 @@ Install SIGIL via git: (this can actually be skipped for now, not using SIGIL ye
     cd /opt/sigil
     export GOPATH=`pwd`
     mkdir src pkg bin
-    git clone git@github.com:cyle/sigil.git src/
+    git clone https://github.com/cyle/sigil.git src/
     go get code.google.com/p/gorest
     cd src/
     go run db.go
@@ -59,7 +59,10 @@ That's all, you should have the necessary dependencies now.
 
 Clone the repository for this server into a directory, such as `/opt/spacegame`
 
-In that directory, run `npm install socket.io mongolian sigil`
+    mkdir /opt/spacegame
+    git clone https://github.com/cyle/spacegame-server.git /opt/spacegame/
+    cd /opt/spacegame/
+    npm install socket.io mongolian sigil
 
 Make sure MongoDB and SIGIL are running.
 
