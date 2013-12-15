@@ -10,6 +10,7 @@ This is super alpha. There's a lot going on here, and it'll change all the time,
 
 ## Dependencies
 
+- Ubuntu 12.04.3 64bit (used in development)
 - Node.js (version 0.10 or higher)
 - Node.js Module: Socket.io (tested using version 0.9.16)
 - Node.js Module: Mongolian (tested using version 0.1.18)
@@ -17,11 +18,46 @@ This is super alpha. There's a lot going on here, and it'll change all the time,
 - MongoDB (tested using version 2.4.6)
 - SIGIL (tested using version 0.0.2)
 
-## Installation
+## Installation Prereqs
 
-Install Node.js, MongoDB, and SIGIL.
+Install Node.js, MongoDB, and SIGIL...
 
-Clone the repository for this server into a directory.
+Install Node.js via `apt`:
+
+    apt-get install python-software-properties
+    add-apt-repository ppa:chris-lea/node.js
+    apt-get update
+    apt-get install nodejs
+
+Install Go via `godeb`: (this can actually be skipped for now, not using SIGIL yet)
+
+    wget https://godeb.s3.amazonaws.com/godeb-amd64.tar.gz
+    tar zxf godeb-amd64.tar.gz
+    ./godeb install
+
+Install SIGIL via git: (this can actually be skipped for now, not using SIGIL yet)
+
+    mkdir /opt/sigil
+    cd /opt/sigil
+    export GOPATH=`pwd`
+    mkdir src pkg bin
+    git clone git@github.com:cyle/sigil.git src/
+    go get code.google.com/p/gorest
+    cd src/
+    go run db.go
+
+Install MongoDB via `apt`:
+
+    apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
+    echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' | tee /etc/apt/sources.list.d/mongodb.list
+    apt-get update
+    apt-get install mongodb-10gen
+
+That's all, you should have the necessary dependencies now.
+
+## Install the Server Itself
+
+Clone the repository for this server into a directory, such as `/opt/spacegame`
 
 In that directory, run `npm install socket.io mongolian sigil`
 
@@ -31,11 +67,9 @@ That should be it!
 
 ## Usage
 
-Pretty simple: `node server.js` for now. Players connecting with their clients must enter the IP or hostname of this server.
+Pretty simple: `node server.js` for now. Players connecting with their browser-based clients must enter the IP or hostname of this server.
 
-If you are just starting, I also suggest running `node utils/build-new-area.js` to build the starting area.
-
-Right now the mongodb ID of this "starting area" is defined on line 72 of `server.js`, so you'll probably need to update that with your starting area.
+If you are just starting, you need to run `node utils/build-start-area.js` to build the starting area, or else players won't have anywhere to spawn.
 
 ## Server Functionality
 
