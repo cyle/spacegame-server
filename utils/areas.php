@@ -64,7 +64,7 @@ a.scale(-1, -1); // flip both because Babylon will render with bottom-right bein
 			echo 'a.rect('.((-$thing['width']/2) * $grid_scale).', '.((-$thing['height']/2) * $grid_scale).', '.($thing['width'] * $grid_scale).', '.($thing['height'] * $grid_scale).');'."\n";
 			echo 'a.fillStyle = "DarkKhaki";'."\n";
 			echo 'a.fill();'."\n";
-		} else if ($thing['type'] == 'ionstorm') {
+		} else if ($thing['type'] == 'ion-storm') {
 			echo 'a.translate('.$thing['x'].', '.$thing['y'].');'."\n";
 			echo 'a.rotate('.$thing['r'].');'."\n";
 			echo 'a.rect('.((-$thing['width']/2) * $grid_scale).', '.((-$thing['height']/2) * $grid_scale).', '.($thing['width'] * $grid_scale).', '.($thing['height'] * $grid_scale).');'."\n";

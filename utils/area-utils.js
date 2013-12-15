@@ -64,7 +64,7 @@ exports.createAsteroidField = function(centerX, centerY, width, height, density)
 	}
 	num_asteroids = Math.round(num_asteroids);
 	
-	console.log('number of asteroids in field: ' + num_asteroids);
+	//console.log('number of asteroids in field: ' + num_asteroids);
 	
 	for (var i = 0; i < num_asteroids; i++) {
 		var a = {};
