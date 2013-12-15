@@ -37,6 +37,7 @@ Install Go via `godeb`: (this can actually be skipped for now, not using SIGIL y
 
 Install SIGIL via git: (this can actually be skipped for now, not using SIGIL yet)
 
+    apt-get install git-core mercurial
     mkdir /opt/sigil
     cd /opt/sigil
     export GOPATH=`pwd`
